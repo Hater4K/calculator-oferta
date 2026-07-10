@@ -289,14 +289,38 @@
       };
     }
 
-    function loadState() {
+    function stateStamp(value) {
+      const stamp = value && value.updatedAt ? Date.parse(value.updatedAt) : 0;
+      return Number.isFinite(stamp) ? stamp : 0;
+    }
+
+    function withStateMeta(value) {
+      return {
+        deals: Array.isArray(value.deals) ? value.deals.map(normalizeDeal) : [],
+        updatedAt: value.updatedAt || new Date().toISOString()
+      };
+    }
+
+    function readSavedState(key) {
       try {
-        const saved = JSON.parse(localStorage.getItem('calculatorOfertaPartide'));
-        if (saved && Array.isArray(saved.deals)) return { deals: saved.deals.map(normalizeDeal) };
-      } catch {}
+        const saved = JSON.parse(localStorage.getItem(key));
+        if (saved && Array.isArray(saved.deals)) return withStateMeta(saved);
+      } catch {
+        return null;
+      }
+      return null;
+    }
+
+    function loadState() {
+      const saved = [
+        readSavedState('calculatorOfertaPartide'),
+        readSavedState('calculatorOfertaPartideBackup'),
+        readSavedState('calculatorOfertaPartideLastGood')
+      ].filter(Boolean).sort((a, b) => stateStamp(b) - stateStamp(a))[0];
+      if (saved && saved.deals.length) return saved;
 
       const migratedDeal = loadLegacyDeal();
-      return { deals: [migratedDeal || {
+      return { updatedAt: new Date().toISOString(), deals: [migratedDeal || {
         id: `${Date.now()}-initial`,
         dealName: 'Oferta 01',
         clientName: '',
@@ -343,8 +367,18 @@
       }));
     }
 
-    function saveState() {
-      localStorage.setItem('calculatorOfertaPartide', JSON.stringify(state));
+    function saveState(skipCloud = false) {
+      state.updatedAt = new Date().toISOString();
+      const payload = JSON.stringify(state);
+      try {
+        localStorage.setItem('calculatorOfertaPartide', payload);
+        localStorage.setItem('calculatorOfertaPartideBackup', payload);
+        if (state.deals.length) localStorage.setItem('calculatorOfertaPartideLastGood', payload);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('LocalStorage eroare', 'error', error && error.message ? error.message : String(error));
+      }
+      if (skipCloud) return;
       scheduleCloudSave();
     }
 
@@ -398,9 +432,14 @@
       if (!firebaseReady || !firebaseDocRef) return;
       const snapshot = await firebaseFns.getDoc(firebaseDocRef);
       if (snapshot.exists() && snapshot.data().state && Array.isArray(snapshot.data().state.deals)) {
+        const cloudState = withStateMeta(snapshot.data().state);
+        if (state.deals.length && stateStamp(state) > stateStamp(cloudState)) {
+          await saveCloudStateNow();
+          return;
+        }
         applyingCloudState = true;
-        state = { deals: snapshot.data().state.deals.map(normalizeDeal) };
-        localStorage.setItem('calculatorOfertaPartide', JSON.stringify(state));
+        state = cloudState;
+        saveState(true);
         selectedDealId = null;
         applyingCloudState = false;
         renderDeals();
@@ -419,9 +458,10 @@
     async function saveCloudStateNow() {
       if (!firebaseReady || !firebaseDocRef) return;
       try {
+        state.updatedAt = state.updatedAt || new Date().toISOString();
         await firebaseFns.setDoc(firebaseDocRef, {
           state,
-          updatedAt: new Date().toISOString()
+          updatedAt: state.updatedAt
         }, { merge: true });
         setSyncStatus('Firebase: salvat');
       } catch (error) {
@@ -668,11 +708,13 @@
       URL.revokeObjectURL(url);
     });
 
-    saveState();
+    window.addEventListener('beforeunload', () => saveState(true));
     renderDeals();
+    initFirebaseSync();
   </script>
 </body>
 </html>
+
 
 
 
