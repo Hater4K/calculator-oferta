@@ -21,3 +21,12 @@ Linkul va fi de forma:
 `https://username.github.io/calculator-oferta/`
 
 Pe iPhone: deschide linkul in Safari -> Share -> Add to Home Screen.
+
+## Firebase
+
+Pentru salvare online:
+1. Creeaza proiect in Firebase Console.
+2. Adauga Web App si copiaza `firebaseConfig`.
+3. Activeaza Firestore Database.
+4. Completeaza `firebase-config.js` cu datele tale.
+5. Incarca pe GitHub: `index.html`, `firebase-config.js`, `manifest.webmanifest`, `icon.svg`, `icon-180.png`, `icon-512.png`.

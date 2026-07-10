@@ -46,6 +46,9 @@
       gap: 16px;
     }
     h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    .sync-status { border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 800; color: #d1fae5; background: rgba(15, 118, 110, .35); }
+    .sync-status.warn { color: #fef3c7; background: rgba(146, 64, 14, .35); }
+    .sync-status.error { color: #fee2e2; background: rgba(185, 28, 28, .35); }
     h2 { margin: 0; font-size: 18px; }
     main { max-width: 1500px; margin: 0 auto; padding: 16px; }
     .toolbar, .deal, .totals, .sheet-wrap, .card, .deals-panel {
@@ -186,7 +189,7 @@
 <body>
   <header>
     <div class="topbar">
-      <h1>Calculator Oferta</h1>
+      <h1>Calculator Oferta</h1><span id="syncStatus" class="sync-status">Local</span>
       <div class="actions">
         <button id="backBtn" hidden>Inapoi la partide</button>
         <button class="primary" id="newDealBtn">Adauga partida</button>
@@ -256,7 +259,11 @@
     </section>
   </main>
 
-  <script>
+  <script src="firebase-config.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
+    import { getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
     let selectedDealId = null;
@@ -333,7 +340,77 @@
       }));
     }
 
-    function saveState() { localStorage.setItem('calculatorOfertaPartide', JSON.stringify(state)); }
+    function saveState() {
+      localStorage.setItem('calculatorOfertaPartide', JSON.stringify(state));
+      scheduleCloudSave();
+    }
+
+    function setSyncStatus(text, kind = '') {
+      const el = byId('syncStatus');
+      el.textContent = text;
+      el.className = `sync-status ${kind}`.trim();
+    }
+
+    function hasFirebaseConfig() {
+      const cfg = window.CALCULATOR_OFERTA_FIREBASE_CONFIG;
+      return cfg && cfg.apiKey && cfg.projectId && !String(cfg.apiKey).includes('PUNE_');
+    }
+
+    async function initFirebaseSync() {
+      if (!hasFirebaseConfig()) {
+        setSyncStatus('Local', 'warn');
+        return;
+      }
+      try {
+        const app = initializeApp(window.CALCULATOR_OFERTA_FIREBASE_CONFIG);
+        firebaseDb = getFirestore(app);
+        firebaseDocRef = doc(firebaseDb, 'calculatorOferta', window.CALCULATOR_OFERTA_FIREBASE_DOCUMENT || 'connect-export-import');
+        try { await enableIndexedDbPersistence(firebaseDb); } catch {}
+        firebaseReady = true;
+        setSyncStatus('Firebase: conectare...', 'warn');
+        await loadCloudState();
+        setSyncStatus('Firebase: salvat');
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Firebase eroare', 'error');
+      }
+    }
+
+    async function loadCloudState() {
+      if (!firebaseReady || !firebaseDocRef) return;
+      const snapshot = await getDoc(firebaseDocRef);
+      if (snapshot.exists() && snapshot.data().state && Array.isArray(snapshot.data().state.deals)) {
+        applyingCloudState = true;
+        state = { deals: snapshot.data().state.deals.map(normalizeDeal) };
+        localStorage.setItem('calculatorOfertaPartide', JSON.stringify(state));
+        selectedDealId = null;
+        applyingCloudState = false;
+        renderDeals();
+        return;
+      }
+      await saveCloudStateNow();
+    }
+
+    function scheduleCloudSave() {
+      if (applyingCloudState || !firebaseReady || !firebaseDocRef) return;
+      clearTimeout(cloudSaveTimer);
+      setSyncStatus('Firebase: se salveaza...', 'warn');
+      cloudSaveTimer = setTimeout(saveCloudStateNow, 600);
+    }
+
+    async function saveCloudStateNow() {
+      if (!firebaseReady || !firebaseDocRef) return;
+      try {
+        await setDoc(firebaseDocRef, {
+          state,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        setSyncStatus('Firebase: salvat');
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Firebase eroare', 'error');
+      }
+    }
     function currentDeal() { return state.deals.find(deal => deal.id === selectedDealId) || null; }
     function currentRows() { return currentDeal()?.rows || []; }
     function rates() { return { PLN: num(byId('ratePLN').value), RON: num(byId('rateRON').value), EUR: num(byId('rateEUR').value) }; }
@@ -578,4 +655,5 @@
   </script>
 </body>
 </html>
+
 
