@@ -265,6 +265,12 @@
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
     let selectedDealId = null;
     let state = loadState();
+    let firebaseDb = null;
+    let firebaseDocRef = null;
+    let firebaseFns = null;
+    let firebaseReady = false;
+    let cloudSaveTimer = null;
+    let applyingCloudState = false;
 
     const byId = id => document.getElementById(id);
     const money = value => `${Number(value || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} lei`;
@@ -657,6 +663,7 @@
   </script>
 </body>
 </html>
+
 
 
 
