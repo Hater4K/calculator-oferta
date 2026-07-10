@@ -1,0 +1,384 @@
+﻿<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Calculator Oferta</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Calculator Oferta" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #64748b;
+      --line: #d7dee8;
+      --head: #0f172a;
+      --accent: #0f766e;
+      --danger: #b91c1c;
+      --field: #f8fafc;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--head);
+      color: white;
+      padding: 12px 18px;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, .18);
+    }
+    .topbar {
+      max-width: 1500px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    main { max-width: 1500px; margin: 0 auto; padding: 16px; }
+    .toolbar, .totals, .sheet-wrap, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+    }
+    .toolbar { padding: 14px; display: grid; gap: 10px; }
+    .toolbar-head strong { font-size: 15px; }
+    .rates { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 10px; max-width: 520px; }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    input, select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--field);
+      color: var(--ink);
+      font: inherit;
+      padding: 7px 9px;
+    }
+    input[type="number"] { text-align: right; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+      color: var(--ink);
+      font-weight: 700;
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+    button.danger { color: var(--danger); }
+    .totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 14px 0; overflow: hidden; }
+    .total-box { padding: 14px; border-right: 1px solid var(--line); }
+    .total-box:last-child { border-right: 0; }
+    .total-box span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .total-box strong { display: block; margin-top: 5px; font-size: 22px; }
+    .sheet-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      min-width: 1780px;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+    th, td { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: middle; }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--head);
+      color: white;
+      font-size: 12px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: #fbfdff; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td input, td select { min-height: 34px; font-size: 13px; }
+    .col-id { width: 78px; }
+    .col-product { width: 190px; }
+    .col-small { width: 112px; }
+    .col-money { width: 130px; }
+    .col-currency { width: 112px; }
+    .col-delete { width: 112px; }
+    .money-cell { font-weight: 800; white-space: nowrap; color: var(--ink); }
+    .mobile-products { display: none; }
+    .row-card { padding: 16px; margin-bottom: 12px; }
+    .row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .row-head h2 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
+    .editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .result-list {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      background: var(--field);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .result-line { display: flex; justify-content: space-between; gap: 12px; }
+    .result-line span { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .result-line strong { font-size: 15px; white-space: nowrap; }
+    @media (max-width: 850px) {
+      header { padding: 10px 12px; }
+      main { padding: 10px; }
+      .topbar { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      h1 { font-size: 28px; }
+      .actions { justify-content: stretch; }
+      .actions button { flex: 1 1 110px; min-height: 34px; padding: 7px 9px; font-size: 13px; }
+      .rates { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      label { font-size: 10px; gap: 4px; }
+      input, select { min-height: 34px; padding: 6px 8px; font-size: 14px; }
+      .totals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .total-box { border-right: 1px solid var(--line); border-bottom: 0; padding: 10px; }
+      .total-box span { font-size: 9px; }
+      .total-box strong { font-size: 15px; }
+      .total-box:last-child { border-right: 0; border-bottom: 0; }
+      .sheet-wrap { display: none; }
+      .mobile-products { display: block; }
+      .row-card { padding: 12px; margin-bottom: 10px; }
+      .row-head { margin-bottom: 10px; }
+      .row-head h2 { font-size: 17px; }
+      .editor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .result-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; padding: 10px; }
+      .result-line { display: grid; gap: 2px; }
+      .result-line span { font-size: 9px; }
+      .result-line strong { font-size: 14px; }
+    }
+    @media (max-width: 520px) {
+      .rates { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .editor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .row-head { align-items: stretch; flex-direction: column; }
+      .result-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .result-line { display: grid; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <h1>Calculator Oferta</h1>
+      <div class="actions">
+        <button class="primary" id="addBtn">Adauga rand</button>
+        <button id="exportBtn">Export CSV</button>
+        <button class="danger" id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="toolbar" aria-label="Setari curs valutar"><div class="toolbar-head"><strong>Curs</strong></div><div class="rates">
+        <label>PLN <input id="ratePLN" type="number" step="0.0001" value="1.25"></label>
+        <label>RON <input id="rateRON" type="number" step="0.0001" value="1"></label>
+        <label>EUR <input id="rateEUR" type="number" step="0.0001" value="5.35"></label>
+      </div>
+    </section>
+
+    <section class="totals" aria-label="Totaluri">
+      <div class="total-box"><span>Total achizitie</span><strong id="totalCost">0.00 lei</strong></div>
+      <div class="total-box"><span>Total client</span><strong id="totalClient">0.00 lei</strong></div>
+      <div class="total-box"><span>Profit estimat</span><strong id="totalProfit">0.00 lei</strong></div>
+    </section>
+
+    <section class="sheet-wrap" aria-label="Tabel produse">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID Oferta</th>
+            <th class="col-product">Produs</th>
+            <th class="col-small">Cantitate</th>
+            <th class="col-small">Pret furnizor</th>
+            <th class="col-currency">Moneda</th>
+            <th class="col-money">Produs lei</th>
+            <th class="col-small">Transport</th>
+            <th class="col-currency">Moneda transp.</th>
+            <th class="col-money">Transport lei</th>
+            <th class="col-money">Achizitie/buc</th>
+            <th class="col-money">Total achizitie</th>
+            <th class="col-small">Adaos %</th>
+            <th class="col-money">Client/buc</th>
+            <th class="col-money">Total client</th>
+            <th class="col-delete"></th>
+          </tr>
+        </thead>
+        <tbody id="desktopRows"></tbody>
+      </table>
+    </section>
+
+    <section class="mobile-products" id="mobileRows" aria-label="Produse"></section>
+  </main>
+
+  <script>
+    const currencies = ['PLN', 'RON', 'EUR'];
+    const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
+    let rows = loadRows();
+
+    const byId = id => document.getElementById(id);
+    const money = value => `${Number(value || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} lei`;
+    const num = value => Number(String(value ?? '').replace(',', '.')) || 0;
+    const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+
+    function loadRows() {
+      try { return normalizeRows(JSON.parse(localStorage.getItem('calculatorOfertaRows')) || JSON.parse(JSON.stringify(initialRows))); }
+      catch { return JSON.parse(JSON.stringify(initialRows)); }
+    }
+    function normalizeRows(sourceRows) {
+      return sourceRows.map(row => ({
+        ...row,
+        markup: num(row.markup) > 0 && num(row.markup) < 1 ? num(row.markup) * 100 : num(row.markup)
+      }));
+    }
+    function saveRows() { localStorage.setItem('calculatorOfertaRows', JSON.stringify(rows)); }
+    function rates() { return { PLN: num(byId('ratePLN').value), RON: num(byId('rateRON').value), EUR: num(byId('rateEUR').value) }; }
+
+    function calculate() {
+      const r = rates();
+      const transportByOffer = {};
+      const weightedByOffer = {};
+      rows.forEach(row => {
+        const productLei = num(row.supplierPrice) * r[row.productCurrency];
+        const transportLei = num(row.transport) * r[row.transportCurrency];
+        transportByOffer[row.offerId] = (transportByOffer[row.offerId] || 0) + transportLei;
+        weightedByOffer[row.offerId] = (weightedByOffer[row.offerId] || 0) + productLei * num(row.quantity);
+      });
+      return rows.map(row => {
+        const productLei = num(row.supplierPrice) * r[row.productCurrency];
+        const transportLei = num(row.transport) * r[row.transportCurrency];
+        const denominator = weightedByOffer[row.offerId] || 0;
+        const unitCost = denominator === 0 ? 0 : productLei + ((transportByOffer[row.offerId] || 0) * productLei / denominator);
+        const totalCost = unitCost * num(row.quantity);
+        const clientUnit = unitCost * (1 + (num(row.markup) / 100));
+        const clientTotal = clientUnit * num(row.quantity);
+        return { row, productLei, transportLei, unitCost, totalCost, clientUnit, clientTotal };
+      });
+    }
+
+    function bareInput(rowIndex, field, type = 'number', step = '0.01') {
+      const value = rows[rowIndex][field] ?? '';
+      return `<input type="${type}" ${type === 'number' ? `step="${step}"` : ''} value="${esc(value)}" data-row="${rowIndex}" data-field="${field}">`;
+    }
+
+    function field(rowIndex, field, label, type = 'number', step = '0.01') {
+      return `<label>${label}${bareInput(rowIndex, field, type, step)}</label>`;
+    }
+
+    function barePicker(rowIndex, field) {
+      const value = rows[rowIndex][field];
+      return `<select data-row="${rowIndex}" data-field="${field}">${currencies.map(c => `<option value="${c}" ${c === value ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
+    }
+
+    function picker(rowIndex, field, label) {
+      return `<label>${label}${barePicker(rowIndex, field)}</label>`;
+    }
+
+    function render() {
+      const calculated = calculate();
+      byId('desktopRows').innerHTML = calculated.map((item, i) => `
+        <tr>
+          <td>${bareInput(i, 'offerId', 'number', '1')}</td>
+          <td>${bareInput(i, 'product', 'text')}</td>
+          <td>${bareInput(i, 'quantity')}</td>
+          <td>${bareInput(i, 'supplierPrice')}</td>
+          <td>${barePicker(i, 'productCurrency')}</td>
+          <td class="money-cell">${money(item.productLei)}</td>
+          <td>${bareInput(i, 'transport')}</td>
+          <td>${barePicker(i, 'transportCurrency')}</td>
+          <td class="money-cell">${money(item.transportLei)}</td>
+          <td class="money-cell">${money(item.unitCost)}</td>
+          <td class="money-cell">${money(item.totalCost)}</td>
+          <td>${bareInput(i, 'markup', 'number', '0.1')}</td>
+          <td class="money-cell">${money(item.clientUnit)}</td>
+          <td class="money-cell">${money(item.clientTotal)}</td>
+          <td><button class="danger" data-delete="${i}">Sterge</button></td>
+        </tr>`).join('');
+
+      byId('mobileRows').innerHTML = calculated.map((item, i) => `
+        <article class="card row-card">
+          <div class="row-head">
+            <h2>${esc(rows[i].product) || 'Produs fara nume'}</h2>
+            <button class="danger" data-delete="${i}">Sterge produs</button>
+          </div>
+          <div class="editor-grid">
+            ${field(i, 'offerId', 'ID Oferta', 'number', '1')}
+            ${field(i, 'product', 'Produs', 'text')}
+            ${field(i, 'quantity', 'Cantitate ceruta')}
+            ${field(i, 'supplierPrice', 'Pret produs furnizor')}
+            ${picker(i, 'productCurrency', 'Moneda produs')}
+            ${field(i, 'transport', 'Transport total')}
+            ${picker(i, 'transportCurrency', 'Moneda transport')}
+            ${field(i, 'markup', 'Adaos produs (%)', 'number', '0.1')}
+          </div>
+          <div class="result-list">
+            <div class="result-line"><span>Pret produs in lei</span><strong>${money(item.productLei)}</strong></div>
+            <div class="result-line"><span>Pret transport in lei</span><strong>${money(item.transportLei)}</strong></div>
+            <div class="result-line"><span>Pret achizitie unitar</span><strong>${money(item.unitCost)}</strong></div>
+            <div class="result-line"><span>Total achizitie</span><strong>${money(item.totalCost)}</strong></div>
+            <div class="result-line"><span>Pret client per bucata</span><strong>${money(item.clientUnit)}</strong></div>
+            <div class="result-line"><span>Total client</span><strong>${money(item.clientTotal)}</strong></div>
+          </div>
+        </article>`).join('');
+
+      const totalCost = calculated.reduce((sum, item) => sum + item.totalCost, 0);
+      const totalClient = calculated.reduce((sum, item) => sum + item.clientTotal, 0);
+      byId('totalCost').textContent = money(totalCost);
+      byId('totalClient').textContent = money(totalClient);
+      byId('totalProfit').textContent = money(totalClient - totalCost);
+      saveRows();
+    }
+
+    document.body.addEventListener('change', event => {
+      const el = event.target;
+      if (!el.dataset || el.dataset.row === undefined) return;
+      const row = rows[Number(el.dataset.row)];
+      const fieldName = el.dataset.field;
+      row[fieldName] = el.type === 'number' ? num(el.value) : el.value;
+      render();
+    });
+
+    document.body.addEventListener('click', event => {
+      const index = event.target.dataset && event.target.dataset.delete;
+      if (index === undefined) return;
+      rows.splice(Number(index), 1);
+      render();
+    });
+
+    ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', render));
+    byId('addBtn').addEventListener('click', () => {
+      const next = Math.max(0, ...rows.map(r => num(r.offerId))) + 1;
+      rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 });
+      render();
+    });
+    byId('resetBtn').addEventListener('click', () => { rows = JSON.parse(JSON.stringify(initialRows)); render(); });
+    byId('exportBtn').addEventListener('click', () => {
+      const calc = calculate();
+      const header = ['ID Oferta','Produs','Cantitate','Pret furnizor','Moneda produs','Pret produs lei','Transport','Moneda transport','Transport lei','Pret achizitie unitar','Total achizitie','Adaos %','Pret client bucata','Total client'];
+      const lines = [header, ...calc.map(item => [item.row.offerId, item.row.product, item.row.quantity, item.row.supplierPrice, item.row.productCurrency, item.productLei.toFixed(2), item.row.transport, item.row.transportCurrency, item.transportLei.toFixed(2), item.unitCost.toFixed(2), item.totalCost.toFixed(2), item.row.markup, item.clientUnit.toFixed(2), item.clientTotal.toFixed(2)])];
+      const csv = lines.map(line => line.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'oferta.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+    render();
+  </script>
+</body>
+</html>
+
+
+
+
