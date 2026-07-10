@@ -261,9 +261,6 @@
 
   <script src="firebase-config.js"></script>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
-
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
     let selectedDealId = null;
@@ -362,10 +359,15 @@
         return;
       }
       try {
-        const app = initializeApp(window.CALCULATOR_OFERTA_FIREBASE_CONFIG);
-        firebaseDb = getFirestore(app);
-        firebaseDocRef = doc(firebaseDb, 'calculatorOferta', window.CALCULATOR_OFERTA_FIREBASE_DOCUMENT || 'connect-export-import');
-        try { await enableIndexedDbPersistence(firebaseDb); } catch {}
+        const [appModule, firestoreModule] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js')
+        ]);
+        firebaseFns = firestoreModule;
+        const app = appModule.initializeApp(window.CALCULATOR_OFERTA_FIREBASE_CONFIG);
+        firebaseDb = firestoreModule.getFirestore(app);
+        firebaseDocRef = firestoreModule.doc(firebaseDb, 'calculatorOferta', window.CALCULATOR_OFERTA_FIREBASE_DOCUMENT || 'connect-export-import');
+        try { await firestoreModule.enableIndexedDbPersistence(firebaseDb); } catch {}
         firebaseReady = true;
         setSyncStatus('Firebase: conectare...', 'warn');
         await loadCloudState();
@@ -378,7 +380,7 @@
 
     async function loadCloudState() {
       if (!firebaseReady || !firebaseDocRef) return;
-      const snapshot = await getDoc(firebaseDocRef);
+      const snapshot = await firebaseFns.getDoc(firebaseDocRef);
       if (snapshot.exists() && snapshot.data().state && Array.isArray(snapshot.data().state.deals)) {
         applyingCloudState = true;
         state = { deals: snapshot.data().state.deals.map(normalizeDeal) };
@@ -401,7 +403,7 @@
     async function saveCloudStateNow() {
       if (!firebaseReady || !firebaseDocRef) return;
       try {
-        await setDoc(firebaseDocRef, {
+        await firebaseFns.setDoc(firebaseDocRef, {
           state,
           updatedAt: new Date().toISOString()
         }, { merge: true });
@@ -655,5 +657,7 @@
   </script>
 </body>
 </html>
+
+
 
 
