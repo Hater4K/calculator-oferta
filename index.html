@@ -285,7 +285,8 @@
         dealName: name || `Oferta ${String(index).padStart(2, '0')}`,
         clientName: '',
         deliveryAddress: '',
-        rows: cloneRows()
+        rows: cloneRows(),
+        updatedAt: new Date().toISOString()
       };
     }
 
@@ -297,7 +298,35 @@
     function withStateMeta(value) {
       return {
         deals: Array.isArray(value.deals) ? value.deals.map(normalizeDeal) : [],
+        deletedDealIds: Array.isArray(value.deletedDealIds) ? value.deletedDealIds : [],
         updatedAt: value.updatedAt || new Date().toISOString()
+      };
+    }
+
+    function dealStamp(deal) {
+      const stamp = deal && deal.updatedAt ? Date.parse(deal.updatedAt) : 0;
+      return Number.isFinite(stamp) ? stamp : 0;
+    }
+
+    function touchDeal(deal) {
+      if (deal) deal.updatedAt = new Date().toISOString();
+    }
+
+    function mergeStates(localState, cloudState) {
+      const local = withStateMeta(localState || { deals: [] });
+      const cloud = withStateMeta(cloudState || { deals: [] });
+      const deleted = new Set([...(local.deletedDealIds || []), ...(cloud.deletedDealIds || [])]);
+      const byId = new Map();
+      [...cloud.deals, ...local.deals].forEach(deal => {
+        if (!deal || deleted.has(deal.id)) return;
+        const previous = byId.get(deal.id);
+        if (!previous || dealStamp(deal) >= dealStamp(previous)) byId.set(deal.id, deal);
+      });
+      const deals = Array.from(byId.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
+      return {
+        deals: deals.length ? deals : cloneRows() && local.deals,
+        deletedDealIds: Array.from(deleted),
+        updatedAt: new Date(Math.max(stateStamp(local), stateStamp(cloud), Date.now())).toISOString()
       };
     }
 
@@ -325,8 +354,9 @@
         dealName: 'Oferta 01',
         clientName: '',
         deliveryAddress: '',
-        rows: cloneRows()
-      }] };
+        rows: cloneRows(),
+        updatedAt: new Date().toISOString()
+      }], deletedDealIds: [] };
     }
 
     function loadLegacyDeal() {
@@ -350,7 +380,8 @@
         dealName: deal.dealName || 'Oferta fara nume',
         clientName: deal.clientName || '',
         deliveryAddress: deal.deliveryAddress || '',
-        rows: normalizeRows(Array.isArray(deal.rows) ? deal.rows : cloneRows())
+        rows: normalizeRows(Array.isArray(deal.rows) ? deal.rows : cloneRows()),
+        updatedAt: deal.updatedAt || new Date().toISOString()
       };
     }
 
@@ -433,16 +464,13 @@
       const snapshot = await firebaseFns.getDoc(firebaseDocRef);
       if (snapshot.exists() && snapshot.data().state && Array.isArray(snapshot.data().state.deals)) {
         const cloudState = withStateMeta(snapshot.data().state);
-        if (state.deals.length && stateStamp(state) > stateStamp(cloudState)) {
-          await saveCloudStateNow();
-          return;
-        }
         applyingCloudState = true;
-        state = cloudState;
+        state = mergeStates(state, cloudState);
         saveState(true);
         selectedDealId = null;
         applyingCloudState = false;
         renderDeals();
+        await saveCloudStateNow();
         return;
       }
       await saveCloudStateNow();
@@ -640,6 +668,7 @@
       const deal = currentDeal();
       if (!deal) return;
       deal[id] = event.target.value;
+      touchDeal(deal);
       saveState();
       byId('currentDealTitle').textContent = deal.dealName || 'Partida oferta';
     }));
@@ -652,6 +681,7 @@
       const row = deal.rows[Number(el.dataset.row)];
       const fieldName = el.dataset.field;
       row[fieldName] = el.type === 'number' ? num(el.value) : el.value;
+      touchDeal(deal);
       renderCalculator();
     });
 
@@ -663,6 +693,8 @@
         return;
       }
       if (target.dataset.deleteDeal) {
+        state.deletedDealIds = state.deletedDealIds || [];
+        state.deletedDealIds.push(target.dataset.deleteDeal);
         state.deals = state.deals.filter(deal => deal.id !== target.dataset.deleteDeal);
         saveState();
         renderDeals();
@@ -672,6 +704,7 @@
         const deal = currentDeal();
         if (!deal) return;
         deal.rows.splice(Number(target.dataset.delete), 1);
+        touchDeal(deal);
         renderCalculator();
       }
     });
@@ -684,12 +717,14 @@
       if (!deal) return;
       const next = Math.max(0, ...deal.rows.map(r => num(r.offerId))) + 1;
       deal.rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 });
+      touchDeal(deal);
       renderCalculator();
     });
     byId('resetBtn').addEventListener('click', () => {
       const deal = currentDeal();
       if (!deal) return;
       deal.rows = cloneRows();
+      touchDeal(deal);
       renderCalculator();
     });
     byId('exportBtn').addEventListener('click', () => {
@@ -714,6 +749,7 @@
   </script>
 </body>
 </html>
+
 
 
 
