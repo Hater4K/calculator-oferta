@@ -27,6 +27,7 @@
     }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--ink); }
+    [hidden] { display: none !important; }
     header {
       position: sticky;
       top: 0;
@@ -45,15 +46,29 @@
       gap: 16px;
     }
     h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    h2 { margin: 0; font-size: 18px; }
     main { max-width: 1500px; margin: 0 auto; padding: 16px; }
-    .toolbar, .totals, .sheet-wrap, .card {
+    .toolbar, .deal, .totals, .sheet-wrap, .card, .deals-panel {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
     }
+    .deals-panel { padding: 14px; display: grid; gap: 12px; }
+    .deals-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .deals-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+    .deal-card { padding: 14px; display: grid; gap: 10px; }
+    .deal-card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+    .deal-meta { display: grid; gap: 5px; color: var(--muted); font-size: 13px; }
+    .deal-meta strong { color: var(--ink); }
+    .deal-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .empty-state { padding: 18px; color: var(--muted); text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
     .toolbar { padding: 14px; display: grid; gap: 10px; }
-    .toolbar-head strong { font-size: 15px; }
+    .deal { padding: 14px; display: grid; gap: 12px; margin-bottom: 14px; }
+    .deal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .deal-head strong, .toolbar-head strong { font-size: 15px; }
+    .deal-grid { display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 10px; }
+    .deal input { background: #ffffff; }
     .rates { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 10px; max-width: 520px; }
     label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
     input, select {
@@ -87,12 +102,7 @@
     .total-box span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
     .total-box strong { display: block; margin-top: 5px; font-size: 22px; }
     .sheet-wrap { overflow-x: hidden; }
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
     th, td { border-bottom: 1px solid var(--line); padding: 6px 5px; vertical-align: middle; }
     th {
       position: sticky;
@@ -141,9 +151,13 @@
       h1 { font-size: 28px; }
       .actions { justify-content: stretch; }
       .actions button { flex: 1 1 110px; min-height: 34px; padding: 7px 9px; font-size: 13px; }
+      .deals-head { align-items: stretch; flex-direction: column; }
+      .deals-list { grid-template-columns: 1fr; }
       .rates { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
       label { font-size: 10px; gap: 4px; }
       input, select { min-height: 34px; padding: 6px 8px; font-size: 14px; }
+      .deal { padding: 12px; gap: 10px; }
+      .deal-grid { grid-template-columns: 1fr; gap: 8px; }
       .totals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .total-box { border-right: 1px solid var(--line); border-bottom: 0; padding: 10px; }
       .total-box span { font-size: 9px; }
@@ -174,78 +188,159 @@
     <div class="topbar">
       <h1>Calculator Oferta</h1>
       <div class="actions">
-        <button class="primary" id="addBtn">Adauga rand</button>
-        <button id="exportBtn">Export CSV</button>
-        <button class="danger" id="resetBtn">Reset</button>
+        <button id="backBtn" hidden>Inapoi la partide</button>
+        <button class="primary" id="newDealBtn">Adauga partida</button>
+        <button class="primary" id="addBtn" hidden>Adauga rand</button>
+        <button id="exportBtn" hidden>Export CSV</button>
+        <button class="danger" id="resetBtn" hidden>Reset</button>
       </div>
     </div>
   </header>
   <main>
-    <section class="toolbar" aria-label="Setari curs valutar"><div class="toolbar-head"><strong>Curs</strong></div><div class="rates">
-        <label>PLN <input id="ratePLN" type="number" step="0.0001" value="1.25"></label>
-        <label>RON <input id="rateRON" type="number" step="0.0001" value="1"></label>
-        <label>EUR <input id="rateEUR" type="number" step="0.0001" value="5.35"></label>
+    <section id="dealsView" class="deals-panel" aria-label="Partide oferta">
+      <div class="deals-head">
+        <h2>Partide oferta</h2>
       </div>
+      <div id="dealsList" class="deals-list"></div>
     </section>
 
-    <section class="totals" aria-label="Totaluri">
-      <div class="total-box"><span>Total cost</span><strong id="totalCost">0.00 lei</strong></div>
-      <div class="total-box"><span>Total client</span><strong id="totalClient">0.00 lei</strong></div>
-      <div class="total-box"><span>Profit estimat</span><strong id="totalProfit">0.00 lei</strong></div>
-    </section>
+    <section id="calculatorView" hidden>
+      <section class="deal" aria-label="Partida oferta">
+        <div class="deal-head"><strong id="currentDealTitle">Partida oferta</strong></div>
+        <div class="deal-grid">
+          <label>Partida <input id="dealName" type="text" placeholder="Ex: Oferta 01"></label>
+          <label>Client <input id="clientName" type="text" placeholder="Nume client"></label>
+          <label>Adresa livrare <input id="deliveryAddress" type="text" placeholder="Adresa de livrare"></label>
+        </div>
+      </section>
 
-    <section class="sheet-wrap" aria-label="Tabel produse">
-      <table>
-        <thead>
-          <tr>
-            <th class="col-id">Oferta</th>
-            <th class="col-product">Produs</th>
-            <th class="col-small">Bucati</th>
-            <th class="col-small">Pret furnizor/buc</th>
-            <th class="col-currency">Moneda pret</th>
-            <th class="col-money">Pret produs in lei</th>
-            <th class="col-small">Transport</th>
-            <th class="col-currency">Moneda transport</th>
-            <th class="col-money">Transport in lei</th>
-            <th class="col-money">Cost final/buc</th>
-            <th class="col-money">Total cost</th>
-            <th class="col-small">Adaos %</th>
-            <th class="col-money">Pret client/buc</th>
-            <th class="col-money">Total client</th>
-            <th class="col-delete"></th>
-          </tr>
-        </thead>
-        <tbody id="desktopRows"></tbody>
-      </table>
-    </section>
+      <section class="toolbar" aria-label="Setari curs valutar"><div class="toolbar-head"><strong>Curs</strong></div><div class="rates">
+          <label>PLN <input id="ratePLN" type="number" step="0.0001" value="1.25"></label>
+          <label>RON <input id="rateRON" type="number" step="0.0001" value="1"></label>
+          <label>EUR <input id="rateEUR" type="number" step="0.0001" value="5.35"></label>
+        </div>
+      </section>
 
-    <section class="mobile-products" id="mobileRows" aria-label="Produse"></section>
+      <section class="totals" aria-label="Totaluri">
+        <div class="total-box"><span>Total cost</span><strong id="totalCost">0.00 lei</strong></div>
+        <div class="total-box"><span>Total client</span><strong id="totalClient">0.00 lei</strong></div>
+        <div class="total-box"><span>Profit estimat</span><strong id="totalProfit">0.00 lei</strong></div>
+      </section>
+
+      <section class="sheet-wrap" aria-label="Tabel produse">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">Oferta</th>
+              <th class="col-product">Produs</th>
+              <th class="col-small">Bucati</th>
+              <th class="col-small">Pret furnizor/buc</th>
+              <th class="col-currency">Moneda pret</th>
+              <th class="col-money">Pret produs in lei</th>
+              <th class="col-small">Transport</th>
+              <th class="col-currency">Moneda transport</th>
+              <th class="col-money">Transport in lei</th>
+              <th class="col-money">Cost final/buc</th>
+              <th class="col-money">Total cost</th>
+              <th class="col-small">Adaos %</th>
+              <th class="col-money">Pret client/buc</th>
+              <th class="col-money">Total client</th>
+              <th class="col-delete"></th>
+            </tr>
+          </thead>
+          <tbody id="desktopRows"></tbody>
+        </table>
+      </section>
+
+      <section class="mobile-products" id="mobileRows" aria-label="Produse"></section>
+    </section>
   </main>
 
   <script>
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
-    let rows = loadRows();
+    let selectedDealId = null;
+    let state = loadState();
 
     const byId = id => document.getElementById(id);
     const money = value => `${Number(value || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} lei`;
     const num = value => Number(String(value ?? '').replace(',', '.')) || 0;
     const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+    function cloneRows() { return JSON.parse(JSON.stringify(initialRows)); }
 
-    function loadRows() {
-      try { return normalizeRows(JSON.parse(localStorage.getItem('calculatorOfertaRows')) || JSON.parse(JSON.stringify(initialRows))); }
-      catch { return JSON.parse(JSON.stringify(initialRows)); }
+    function makeDeal(name = '') {
+      const index = state && state.deals ? state.deals.length + 1 : 1;
+      return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        dealName: name || `Oferta ${String(index).padStart(2, '0')}`,
+        clientName: '',
+        deliveryAddress: '',
+        rows: cloneRows()
+      };
     }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('calculatorOfertaPartide'));
+        if (saved && Array.isArray(saved.deals)) return { deals: saved.deals.map(normalizeDeal) };
+      } catch {}
+
+      const migratedDeal = loadLegacyDeal();
+      return { deals: [migratedDeal || {
+        id: `${Date.now()}-initial`,
+        dealName: 'Oferta 01',
+        clientName: '',
+        deliveryAddress: '',
+        rows: cloneRows()
+      }] };
+    }
+
+    function loadLegacyDeal() {
+      try {
+        const legacyRows = JSON.parse(localStorage.getItem('calculatorOfertaRows'));
+        const legacyDeal = JSON.parse(localStorage.getItem('calculatorOfertaDeal')) || {};
+        if (!legacyRows && !legacyDeal.dealName && !legacyDeal.clientName && !legacyDeal.deliveryAddress) return null;
+        return normalizeDeal({
+          id: `${Date.now()}-migrated`,
+          dealName: legacyDeal.dealName || 'Oferta 01',
+          clientName: legacyDeal.clientName || '',
+          deliveryAddress: legacyDeal.deliveryAddress || '',
+          rows: legacyRows || cloneRows()
+        });
+      } catch { return null; }
+    }
+
+    function normalizeDeal(deal) {
+      return {
+        id: deal.id || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        dealName: deal.dealName || 'Oferta fara nume',
+        clientName: deal.clientName || '',
+        deliveryAddress: deal.deliveryAddress || '',
+        rows: normalizeRows(Array.isArray(deal.rows) ? deal.rows : cloneRows())
+      };
+    }
+
     function normalizeRows(sourceRows) {
       return sourceRows.map(row => ({
-        ...row,
+        offerId: row.offerId ?? 1,
+        product: row.product || '',
+        quantity: num(row.quantity) || 0,
+        supplierPrice: num(row.supplierPrice),
+        productCurrency: currencies.includes(row.productCurrency) ? row.productCurrency : 'EUR',
+        transport: num(row.transport),
+        transportCurrency: currencies.includes(row.transportCurrency) ? row.transportCurrency : 'EUR',
         markup: num(row.markup) > 0 && num(row.markup) < 1 ? num(row.markup) * 100 : num(row.markup)
       }));
     }
-    function saveRows() { localStorage.setItem('calculatorOfertaRows', JSON.stringify(rows)); }
+
+    function saveState() { localStorage.setItem('calculatorOfertaPartide', JSON.stringify(state)); }
+    function currentDeal() { return state.deals.find(deal => deal.id === selectedDealId) || null; }
+    function currentRows() { return currentDeal()?.rows || []; }
     function rates() { return { PLN: num(byId('ratePLN').value), RON: num(byId('rateRON').value), EUR: num(byId('rateEUR').value) }; }
 
-    function calculate() {
+    function calculate(deal = currentDeal()) {
+      if (!deal) return [];
+      const rows = deal.rows;
       const r = rates();
       const transportByOffer = {};
       const weightedByOffer = {};
@@ -267,26 +362,85 @@
       });
     }
 
+    function totalsFor(deal) {
+      const calc = calculate(deal);
+      const totalCost = calc.reduce((sum, item) => sum + item.totalCost, 0);
+      const totalClient = calc.reduce((sum, item) => sum + item.clientTotal, 0);
+      return { totalCost, totalClient, profit: totalClient - totalCost };
+    }
+
     function bareInput(rowIndex, field, type = 'number', step = '0.01') {
-      const value = rows[rowIndex][field] ?? '';
+      const row = currentRows()[rowIndex] || {};
+      const value = row[field] ?? '';
       return `<input type="${type}" ${type === 'number' ? `step="${step}"` : ''} value="${esc(value)}" data-row="${rowIndex}" data-field="${field}">`;
     }
 
-    function field(rowIndex, field, label, type = 'number', step = '0.01') {
-      return `<label>${label}${bareInput(rowIndex, field, type, step)}</label>`;
+    function field(rowIndex, fieldName, label, type = 'number', step = '0.01') {
+      return `<label>${label}${bareInput(rowIndex, fieldName, type, step)}</label>`;
     }
 
-    function barePicker(rowIndex, field) {
-      const value = rows[rowIndex][field];
-      return `<select data-row="${rowIndex}" data-field="${field}">${currencies.map(c => `<option value="${c}" ${c === value ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
+    function barePicker(rowIndex, fieldName) {
+      const row = currentRows()[rowIndex] || {};
+      const value = row[fieldName];
+      return `<select data-row="${rowIndex}" data-field="${fieldName}">${currencies.map(c => `<option value="${c}" ${c === value ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
     }
 
-    function picker(rowIndex, field, label) {
-      return `<label>${label}${barePicker(rowIndex, field)}</label>`;
+    function picker(rowIndex, fieldName, label) {
+      return `<label>${label}${barePicker(rowIndex, fieldName)}</label>`;
     }
 
-    function render() {
-      const calculated = calculate();
+    function renderDeals() {
+      byId('dealsView').hidden = false;
+      byId('calculatorView').hidden = true;
+      byId('backBtn').hidden = true;
+      byId('newDealBtn').hidden = false;
+      byId('addBtn').hidden = true;
+      byId('exportBtn').hidden = true;
+      byId('resetBtn').hidden = true;
+
+      if (!state.deals.length) {
+        byId('dealsList').innerHTML = '<div class="empty-state">Nu exista partide salvate.</div>';
+        return;
+      }
+
+      byId('dealsList').innerHTML = state.deals.map(deal => {
+        const totals = totalsFor(deal);
+        return `
+          <article class="card deal-card">
+            <h3>${esc(deal.dealName)}</h3>
+            <div class="deal-meta">
+              <span>Client: <strong>${esc(deal.clientName) || '-'}</strong></span>
+              <span>Adresa: <strong>${esc(deal.deliveryAddress) || '-'}</strong></span>
+              <span>Total client: <strong>${money(totals.totalClient)}</strong></span>
+            </div>
+            <div class="deal-actions">
+              <button class="primary" data-open-deal="${esc(deal.id)}">Deschide</button>
+              <button class="danger" data-delete-deal="${esc(deal.id)}">Sterge</button>
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    function renderDealForm(deal) {
+      byId('currentDealTitle').textContent = deal.dealName || 'Partida oferta';
+      byId('dealName').value = deal.dealName || '';
+      byId('clientName').value = deal.clientName || '';
+      byId('deliveryAddress').value = deal.deliveryAddress || '';
+    }
+
+    function renderCalculator() {
+      const deal = currentDeal();
+      if (!deal) { renderDeals(); return; }
+      byId('dealsView').hidden = true;
+      byId('calculatorView').hidden = false;
+      byId('backBtn').hidden = false;
+      byId('newDealBtn').hidden = true;
+      byId('addBtn').hidden = false;
+      byId('exportBtn').hidden = false;
+      byId('resetBtn').hidden = false;
+      renderDealForm(deal);
+
+      const calculated = calculate(deal);
       byId('desktopRows').innerHTML = calculated.map((item, i) => `
         <tr>
           <td>${bareInput(i, 'offerId', 'number', '1')}</td>
@@ -309,7 +463,7 @@
       byId('mobileRows').innerHTML = calculated.map((item, i) => `
         <article class="card row-card">
           <div class="row-head">
-            <h2>${esc(rows[i].product) || 'Produs fara nume'}</h2>
+            <h2>${esc(deal.rows[i].product) || 'Produs fara nume'}</h2>
             <button class="danger" data-delete="${i}">Sterge produs</button>
           </div>
           <div class="editor-grid">
@@ -332,58 +486,96 @@
           </div>
         </article>`).join('');
 
-      const totalCost = calculated.reduce((sum, item) => sum + item.totalCost, 0);
-      const totalClient = calculated.reduce((sum, item) => sum + item.clientTotal, 0);
-      byId('totalCost').textContent = money(totalCost);
-      byId('totalClient').textContent = money(totalClient);
-      byId('totalProfit').textContent = money(totalClient - totalCost);
-      saveRows();
+      const totals = totalsFor(deal);
+      byId('totalCost').textContent = money(totals.totalCost);
+      byId('totalClient').textContent = money(totals.totalClient);
+      byId('totalProfit').textContent = money(totals.profit);
+      saveState();
     }
+
+    function createDeal() {
+      const deal = makeDeal();
+      state.deals.unshift(deal);
+      selectedDealId = deal.id;
+      saveState();
+      renderCalculator();
+    }
+
+    ['dealName', 'clientName', 'deliveryAddress'].forEach(id => byId(id).addEventListener('input', event => {
+      const deal = currentDeal();
+      if (!deal) return;
+      deal[id] = event.target.value;
+      saveState();
+      byId('currentDealTitle').textContent = deal.dealName || 'Partida oferta';
+    }));
 
     document.body.addEventListener('change', event => {
       const el = event.target;
       if (!el.dataset || el.dataset.row === undefined) return;
-      const row = rows[Number(el.dataset.row)];
+      const deal = currentDeal();
+      if (!deal) return;
+      const row = deal.rows[Number(el.dataset.row)];
       const fieldName = el.dataset.field;
       row[fieldName] = el.type === 'number' ? num(el.value) : el.value;
-      render();
+      renderCalculator();
     });
 
     document.body.addEventListener('click', event => {
-      const index = event.target.dataset && event.target.dataset.delete;
-      if (index === undefined) return;
-      rows.splice(Number(index), 1);
-      render();
+      const target = event.target;
+      if (target.dataset.openDeal) {
+        selectedDealId = target.dataset.openDeal;
+        renderCalculator();
+        return;
+      }
+      if (target.dataset.deleteDeal) {
+        state.deals = state.deals.filter(deal => deal.id !== target.dataset.deleteDeal);
+        saveState();
+        renderDeals();
+        return;
+      }
+      if (target.dataset.delete !== undefined) {
+        const deal = currentDeal();
+        if (!deal) return;
+        deal.rows.splice(Number(target.dataset.delete), 1);
+        renderCalculator();
+      }
     });
 
-    ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', render));
+    ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', renderCalculator));
+    byId('newDealBtn').addEventListener('click', createDeal);
+    byId('backBtn').addEventListener('click', () => { selectedDealId = null; renderDeals(); });
     byId('addBtn').addEventListener('click', () => {
-      const next = Math.max(0, ...rows.map(r => num(r.offerId))) + 1;
-      rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 });
-      render();
+      const deal = currentDeal();
+      if (!deal) return;
+      const next = Math.max(0, ...deal.rows.map(r => num(r.offerId))) + 1;
+      deal.rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 });
+      renderCalculator();
     });
-    byId('resetBtn').addEventListener('click', () => { rows = JSON.parse(JSON.stringify(initialRows)); render(); });
+    byId('resetBtn').addEventListener('click', () => {
+      const deal = currentDeal();
+      if (!deal) return;
+      deal.rows = cloneRows();
+      renderCalculator();
+    });
     byId('exportBtn').addEventListener('click', () => {
-      const calc = calculate();
+      const deal = currentDeal();
+      if (!deal) return;
+      const calc = calculate(deal);
       const header = ['Oferta','Produs','Bucati','Pret furnizor/buc','Moneda pret','Pret produs in lei','Transport total','Moneda transport','Transport in lei','Cost final/buc','Total cost','Adaos %','Pret client/buc','Total client'];
-      const lines = [header, ...calc.map(item => [item.row.offerId, item.row.product, item.row.quantity, item.row.supplierPrice, item.row.productCurrency, item.productLei.toFixed(2), item.row.transport, item.row.transportCurrency, item.transportLei.toFixed(2), item.unitCost.toFixed(2), item.totalCost.toFixed(2), item.row.markup, item.clientUnit.toFixed(2), item.clientTotal.toFixed(2)])];
+      const info = [['Partida', deal.dealName || ''], ['Client', deal.clientName || ''], ['Adresa livrare', deal.deliveryAddress || ''], []];
+      const lines = [...info, header, ...calc.map(item => [item.row.offerId, item.row.product, item.row.quantity, item.row.supplierPrice, item.row.productCurrency, item.productLei.toFixed(2), item.row.transport, item.row.transportCurrency, item.transportLei.toFixed(2), item.unitCost.toFixed(2), item.totalCost.toFixed(2), item.row.markup, item.clientUnit.toFixed(2), item.clientTotal.toFixed(2)])];
       const csv = lines.map(line => line.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'oferta.csv';
+      a.download = `${(deal.dealName || 'oferta').replace(/[^a-z0-9_-]+/gi, '_')}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
-    render();
+
+    saveState();
+    renderDeals();
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
 
