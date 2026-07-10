@@ -65,6 +65,7 @@
     .deal-meta { display: grid; gap: 5px; color: var(--muted); font-size: 13px; }
     .deal-meta strong { color: var(--ink); }
     .deal-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .archived-head { grid-column: 1 / -1; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line); }
     .empty-state { padding: 18px; color: var(--muted); text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
     .toolbar { padding: 14px; display: grid; gap: 10px; }
     .deal { padding: 14px; display: grid; gap: 12px; margin-bottom: 14px; }
@@ -98,6 +99,7 @@
       white-space: nowrap;
     }
     button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+    button.archive { color: #7c5800; background: #fff7df; border-color: #f0d48a; }
     button.danger { color: var(--danger); }
     .totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 14px 0; overflow: hidden; }
     .total-box { padding: 14px; border-right: 1px solid var(--line); }
@@ -413,6 +415,7 @@
         clientName: deal.clientName || '',
         deliveryAddress: deal.deliveryAddress || '',
         rows: normalizeRows(Array.isArray(deal.rows) ? deal.rows : cloneRows()),
+        archivedAt: deal.archivedAt || '',
         updatedAt: deal.updatedAt || new Date().toISOString()
       };
     }
@@ -584,6 +587,24 @@
       return `<label>${label}${barePicker(rowIndex, fieldName)}</label>`;
     }
 
+    function dealCard(deal, archived = false) {
+      const totals = totalsFor(deal);
+      return `
+        <article class="card deal-card">
+          <h3>${esc(deal.dealName)}</h3>
+          <div class="deal-meta">
+            <span>Client: <strong>${esc(deal.clientName) || '-'}</strong></span>
+            <span>Adresa: <strong>${esc(deal.deliveryAddress) || '-'}</strong></span>
+            <span>Total client: <strong>${money(totals.totalClient)}</strong></span>
+          </div>
+          <div class="deal-actions">
+            ${archived ? '' : `<button class="primary" data-open-deal="${esc(deal.id)}">Deschide</button>`}
+            ${archived ? `<button class="primary" data-restore-deal="${esc(deal.id)}">Restaureaza</button>` : `<button class="archive" data-archive-deal="${esc(deal.id)}">Arhiveaza</button>`}
+            <button class="danger" data-delete-deal="${esc(deal.id)}">Sterge</button>
+          </div>
+        </article>`;
+    }
+
     function renderDeals() {
       byId('dealsView').hidden = false;
       byId('calculatorView').hidden = true;
@@ -593,27 +614,16 @@
       byId('exportBtn').hidden = true;
       byId('resetBtn').hidden = true;
 
-      if (!state.deals.length) {
-        byId('dealsList').innerHTML = '<div class="empty-state">Nu exista partide salvate.</div>';
-        return;
-      }
+      const activeDeals = state.deals.filter(deal => !deal.archivedAt);
+      const archivedDeals = state.deals.filter(deal => deal.archivedAt);
+      const activeHtml = activeDeals.length
+        ? activeDeals.map(deal => dealCard(deal)).join('')
+        : '<div class="empty-state">Nu exista partide active.</div>';
+      const archivedHtml = archivedDeals.length ? `
+        <div class="deals-head archived-head"><h2>Arhivate</h2></div>
+        ${archivedDeals.map(deal => dealCard(deal, true)).join('')}` : '';
 
-      byId('dealsList').innerHTML = state.deals.map(deal => {
-        const totals = totalsFor(deal);
-        return `
-          <article class="card deal-card">
-            <h3>${esc(deal.dealName)}</h3>
-            <div class="deal-meta">
-              <span>Client: <strong>${esc(deal.clientName) || '-'}</strong></span>
-              <span>Adresa: <strong>${esc(deal.deliveryAddress) || '-'}</strong></span>
-              <span>Total client: <strong>${money(totals.totalClient)}</strong></span>
-            </div>
-            <div class="deal-actions">
-              <button class="primary" data-open-deal="${esc(deal.id)}">Deschide</button>
-              <button class="danger" data-delete-deal="${esc(deal.id)}">Sterge</button>
-            </div>
-          </article>`;
-      }).join('');
+      byId('dealsList').innerHTML = activeHtml + archivedHtml;
     }
 
     function renderDealForm(deal) {
@@ -724,6 +734,24 @@
         renderCalculator();
         return;
       }
+      if (target.dataset.archiveDeal) {
+        const deal = state.deals.find(item => item.id === target.dataset.archiveDeal);
+        if (!deal) return;
+        deal.archivedAt = new Date().toISOString();
+        touchDeal(deal);
+        saveState();
+        renderDeals();
+        return;
+      }
+      if (target.dataset.restoreDeal) {
+        const deal = state.deals.find(item => item.id === target.dataset.restoreDeal);
+        if (!deal) return;
+        deal.archivedAt = '';
+        touchDeal(deal);
+        saveState();
+        renderDeals();
+        return;
+      }
       if (target.dataset.deleteDeal) {
         state.deletedDealIds = state.deletedDealIds || [];
         state.deletedDealIds.push(target.dataset.deleteDeal);
@@ -781,6 +809,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
