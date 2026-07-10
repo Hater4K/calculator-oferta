@@ -348,9 +348,19 @@
       scheduleCloudSave();
     }
 
-    function setSyncStatus(text, kind = '') {
+    function firebaseErrorText(error) {
+      const code = error && error.code ? String(error.code) : '';
+      const message = error && error.message ? String(error.message) : String(error || 'eroare necunoscuta');
+      if (code.includes('permission-denied')) return 'Firebase: reguli blocate';
+      if (code.includes('unavailable')) return 'Firebase: indisponibil';
+      if (message.includes('Failed to fetch dynamically imported module')) return 'Firebase: SDK nu se incarca';
+      return 'Firebase eroare';
+    }
+
+    function setSyncStatus(text, kind = '', detail = '') {
       const el = byId('syncStatus');
       el.textContent = text;
+      el.title = detail || text;
       el.className = `sync-status ${kind}`.trim();
     }
 
@@ -361,13 +371,13 @@
 
     async function initFirebaseSync() {
       if (!hasFirebaseConfig()) {
-        setSyncStatus('Local', 'warn');
+        setSyncStatus('Local - fara config Firebase', 'warn', 'Nu gasesc firebase-config.js configurat pe site. Urca firebase-config.js langa index.html.');
         return;
       }
       try {
         const [appModule, firestoreModule] = await Promise.all([
-          import('https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js'),
-          import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js')
+          import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
         ]);
         firebaseFns = firestoreModule;
         const app = appModule.initializeApp(window.CALCULATOR_OFERTA_FIREBASE_CONFIG);
@@ -380,7 +390,7 @@
         setSyncStatus('Firebase: salvat');
       } catch (error) {
         console.error(error);
-        setSyncStatus('Firebase eroare', 'error');
+        setSyncStatus(firebaseErrorText(error), 'error', error && error.message ? error.message : String(error));
       }
     }
 
@@ -416,7 +426,7 @@
         setSyncStatus('Firebase: salvat');
       } catch (error) {
         console.error(error);
-        setSyncStatus('Firebase eroare', 'error');
+        setSyncStatus(firebaseErrorText(error), 'error', error && error.message ? error.message : String(error));
       }
     }
     function currentDeal() { return state.deals.find(deal => deal.id === selectedDealId) || null; }
@@ -663,6 +673,7 @@
   </script>
 </body>
 </html>
+
 
 
 
