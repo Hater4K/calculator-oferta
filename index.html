@@ -312,19 +312,51 @@
       if (deal) deal.updatedAt = new Date().toISOString();
     }
 
+    function dealSignature(deal) {
+      return JSON.stringify({
+        name: deal.dealName || '',
+        client: deal.clientName || '',
+        address: deal.deliveryAddress || '',
+        rows: deal.rows || []
+      });
+    }
+
+    function isBlankInitialDeal(deal) {
+      return deal.dealName === 'Oferta 01' && !deal.clientName && !deal.deliveryAddress && dealSignature(deal) === dealSignature(normalizeDeal({ id: 'default-offer-01', dealName: 'Oferta 01', rows: cloneRows() }));
+    }
+
     function mergeStates(localState, cloudState) {
       const local = withStateMeta(localState || { deals: [] });
       const cloud = withStateMeta(cloudState || { deals: [] });
       const deleted = new Set([...(local.deletedDealIds || []), ...(cloud.deletedDealIds || [])]);
       const byId = new Map();
-      [...cloud.deals, ...local.deals].forEach(deal => {
-        if (!deal || deleted.has(deal.id)) return;
-        const previous = byId.get(deal.id);
-        if (!previous || dealStamp(deal) >= dealStamp(previous)) byId.set(deal.id, deal);
+      const bySignature = new Map();
+
+      [...cloud.deals, ...local.deals].forEach(rawDeal => {
+        if (!rawDeal || deleted.has(rawDeal.id)) return;
+        const deal = isBlankInitialDeal(rawDeal) ? { ...rawDeal, id: 'default-offer-01' } : rawDeal;
+        const existingById = byId.get(deal.id);
+        if (existingById && dealStamp(existingById) > dealStamp(deal)) return;
+
+        const signature = dealSignature(deal);
+        const existingSignatureId = bySignature.get(signature);
+        if (existingSignatureId) {
+          const existing = byId.get(existingSignatureId);
+          if (!existing || dealStamp(deal) >= dealStamp(existing)) {
+            byId.delete(existingSignatureId);
+            byId.set(deal.id, deal);
+            bySignature.set(signature, deal.id);
+          }
+          return;
+        }
+
+        byId.set(deal.id, deal);
+        bySignature.set(signature, deal.id);
       });
+
       const deals = Array.from(byId.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
       return {
-        deals: deals.length ? deals : cloneRows() && local.deals,
+        deals: deals.length ? deals : local.deals,
         deletedDealIds: Array.from(deleted),
         updatedAt: new Date(Math.max(stateStamp(local), stateStamp(cloud), Date.now())).toISOString()
       };
@@ -350,7 +382,7 @@
 
       const migratedDeal = loadLegacyDeal();
       return { updatedAt: new Date().toISOString(), deals: [migratedDeal || {
-        id: `${Date.now()}-initial`,
+        id: 'default-offer-01',
         dealName: 'Oferta 01',
         clientName: '',
         deliveryAddress: '',
@@ -749,6 +781,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
