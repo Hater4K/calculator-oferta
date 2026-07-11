@@ -268,7 +268,7 @@
   <script src="firebase-config.js?v=20260711-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="offers.js?v=20260711-15"></script>
+  <script src="offers.js?v=20260711-16"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
@@ -623,6 +623,7 @@
     }
 
     function renderDeals() {
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.closeArchive) window.calculatorOfertaOffers.closeArchive();
       byId('dealsView').hidden = false;
       byId('calculatorView').hidden = true;
       byId('backBtn').hidden = true;
@@ -630,6 +631,7 @@
       byId('addBtn').hidden = true;
       byId('exportBtn').hidden = true;
       byId('resetBtn').hidden = true;
+      if (byId('offersArchiveBtn')) byId('offersArchiveBtn').hidden = false;
 
       const activeDeals = state.deals.filter(deal => !deal.archivedAt);
       const archivedDeals = state.deals.filter(deal => deal.archivedAt);
@@ -661,6 +663,7 @@
       byId('addBtn').hidden = false;
       byId('exportBtn').hidden = false;
       byId('resetBtn').hidden = false;
+      if (byId('offersArchiveBtn')) byId('offersArchiveBtn').hidden = true;
       renderDealForm(deal);
 
       const calculated = calculate(deal);
@@ -796,7 +799,11 @@
 
     ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', renderCalculator));
     byId('newDealBtn').addEventListener('click', createDeal);
-    byId('backBtn').addEventListener('click', () => { selectedDealId = null; renderDeals(); });
+    byId('backBtn').addEventListener('click', () => {
+      selectedDealId = null;
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.back) { window.calculatorOfertaOffers.back(); return; }
+      renderDeals();
+    });
     byId('addBtn').addEventListener('click', () => {
       const deal = currentDeal();
       if (!deal) return;
