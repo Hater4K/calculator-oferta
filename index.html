@@ -108,6 +108,7 @@
     .total-box span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
     .total-box strong { display: block; margin-top: 5px; font-size: 22px; }
     .sheet-wrap { overflow-x: hidden; }
+    .discount-warning { margin-top: 10px; padding: 10px 12px; border: 1px solid #f0b8b8; border-radius: 7px; background: #fff5f5; color: #9b1c1c; font-weight: 700; font-size: 13px; }
     table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
     th, td { border-bottom: 1px solid var(--line); padding: 6px 5px; vertical-align: middle; }
     th {
@@ -249,6 +250,7 @@
               <th class="col-money">Cost final/buc</th>
               <th class="col-money">Total cost</th>
               <th class="col-small">Adaos %</th>
+              <th class="col-small">Discount %</th>
               <th class="col-money">Pret client/buc</th>
               <th class="col-money">Total client</th>
               <th class="col-delete"></th>
@@ -258,6 +260,7 @@
         </table>
       </section>
 
+      <div id="discountWarning" class="discount-warning" hidden></div>
       <section class="mobile-products" id="mobileRows" aria-label="Produse"></section>
     </section>
   </main>
@@ -265,10 +268,10 @@
   <script src="firebase-config.js?v=20260711-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="offers.js?v=20260711-12"></script>
+  <script src="offers.js?v=20260711-13"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
-    const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
+    const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
     let selectedDealId = null;
     let state = loadState();
     let firebaseDb = null;
@@ -447,7 +450,8 @@
         productCurrency: currencies.includes(row.productCurrency) ? row.productCurrency : 'EUR',
         transport: num(row.transport),
         transportCurrency: currencies.includes(row.transportCurrency) ? row.transportCurrency : 'EUR',
-        markup: num(row.markup) > 0 && num(row.markup) < 1 ? num(row.markup) * 100 : num(row.markup)
+        markup: num(row.markup) > 0 && num(row.markup) < 1 ? num(row.markup) * 100 : num(row.markup),
+        discount: Math.max(0, num(row.discount))
       }));
     }
 
@@ -572,9 +576,11 @@
         const denominator = weightedByOffer[row.offerId] || 0;
         const unitCost = denominator === 0 ? 0 : productLei + ((transportByOffer[row.offerId] || 0) * productLei / denominator);
         const totalCost = unitCost * num(row.quantity);
-        const clientUnit = unitCost * (1 + (num(row.markup) / 100));
+        const requestedDiscount = num(row.discount);
+        const appliedDiscount = requestedDiscount > 0 && requestedDiscount < num(row.markup) ? requestedDiscount : 0;
+        const clientUnit = unitCost * (1 + (num(row.markup) / 100)) * (1 - (appliedDiscount / 100));
         const clientTotal = clientUnit * num(row.quantity);
-        return { row, productLei, transportLei, unitCost, totalCost, clientUnit, clientTotal };
+        return { row, productLei, transportLei, unitCost, totalCost, clientUnit, clientTotal, requestedDiscount, appliedDiscount };
       });
     }
 
@@ -679,6 +685,7 @@
           <td class="money-cell">${money(item.unitCost)}</td>
           <td class="money-cell">${money(item.totalCost)}</td>
           <td>${bareInput(i, 'markup', 'number', '0.1')}</td>
+          <td>${bareInput(i, 'discount', 'number', '0.1')}</td>
           <td class="money-cell">${money(item.clientUnit)}</td>
           <td class="money-cell">${money(item.clientTotal)}</td>
           <td><button class="danger" data-delete="${i}">Sterge</button></td>
@@ -699,6 +706,7 @@
             ${field(i, 'transport', 'Transport total')}
             ${picker(i, 'transportCurrency', 'Moneda transport')}
             ${field(i, 'markup', 'Adaos produs (%)', 'number', '0.1')}
+            ${field(i, 'discount', 'Discount (%)', 'number', '0.1')}
           </div>
           <div class="result-list">
             <div class="result-line"><span>Pret produs in lei</span><strong>${money(item.productLei)}</strong></div>
@@ -711,6 +719,10 @@
         </article>`).join('');
 
       const totals = totalsFor(deal);
+      const invalidDiscounts = deal.rows.filter(row => num(row.discount) > 0 && num(row.discount) >= num(row.markup));
+      const warning = byId('discountWarning');
+      warning.hidden = invalidDiscounts.length === 0;
+      warning.textContent = invalidDiscounts.length ? 'Atentie: Discountul trebuie sa fie mai mic decat adaosul pentru: ' + invalidDiscounts.map(row => row.product || 'produs fara nume').join(', ') + '. Discountul nu a fost aplicat.' : '';
       byId('totalCost').textContent = money(totals.totalCost);
       byId('totalClient').textContent = money(totals.totalClient);
       byId('totalProfit').textContent = money(totals.profit);
@@ -796,7 +808,7 @@
       const deal = currentDeal();
       if (!deal) return;
       const next = Math.max(0, ...deal.rows.map(r => num(r.offerId))) + 1;
-      deal.rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 });
+      deal.rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 });
       touchDeal(deal);
       renderCalculator();
     });
@@ -811,9 +823,9 @@
       const deal = currentDeal();
       if (!deal) return;
       const calc = calculate(deal);
-      const header = ['Oferta','Produs','Bucati','Pret furnizor/buc','Moneda pret','Pret produs in lei','Transport total','Moneda transport','Transport in lei','Cost final/buc','Total cost','Adaos %','Pret client/buc','Total client'];
+      const header = ['Oferta','Produs','Bucati','Pret furnizor/buc','Moneda pret','Pret produs in lei','Transport total','Moneda transport','Transport in lei','Cost final/buc','Total cost','Adaos %','Discount %','Pret client/buc','Total client'];
       const info = [['Partida', deal.dealName || ''], ['Client', deal.clientName || ''], ['Adresa livrare', deal.deliveryAddress || ''], []];
-      const lines = [...info, header, ...calc.map(item => [item.row.offerId, item.row.product, item.row.quantity, item.row.supplierPrice, item.row.productCurrency, item.productLei.toFixed(2), item.row.transport, item.row.transportCurrency, item.transportLei.toFixed(2), item.unitCost.toFixed(2), item.totalCost.toFixed(2), item.row.markup, item.clientUnit.toFixed(2), item.clientTotal.toFixed(2)])];
+      const lines = [...info, header, ...calc.map(item => [item.row.offerId, item.row.product, item.row.quantity, item.row.supplierPrice, item.row.productCurrency, item.productLei.toFixed(2), item.row.transport, item.row.transportCurrency, item.transportLei.toFixed(2), item.unitCost.toFixed(2), item.totalCost.toFixed(2), item.row.markup, item.row.discount || 0, item.clientUnit.toFixed(2), item.clientTotal.toFixed(2)])];
       const csv = lines.map(line => line.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const a = document.createElement('a');
