@@ -48,3 +48,8 @@
 .offer-image-item { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--field); }
 .offer-image-item > strong { font-size: 14px; overflow-wrap: anywhere; }
 @media (max-width: 850px) { .offer-image-list { grid-template-columns: 1fr; } }
+
+.offer-image-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+.offer-image-control span { grid-column: 1 / -1; color: #0f766e; font-size: 12px; font-weight: 700; }
+.offer-image-control button { min-height: 36px; }
+@media (max-width: 560px) { .offer-image-control { grid-template-columns: 1fr; } }
