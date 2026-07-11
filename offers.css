@@ -1,41 +1,29 @@
-
-.offers-panel { margin-top: 14px; }
-.offers-panel[hidden], .offer-editor-view[hidden] { display: none !important; }
-.offers-list { display: grid; gap: 10px; }
-.offer-card { padding: 14px; display: grid; gap: 10px; }
-.offer-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.offer-card h3 { margin: 0; font-size: 17px; }
-.offer-card p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
-.offer-card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.offer-card-grid span { color: var(--muted); font-size: 12px; }
-.offer-card-grid strong { display: block; margin-top: 3px; color: var(--ink); font-size: 14px; overflow-wrap: anywhere; }
-.status-chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px; font-size: 11px; font-weight: 800; white-space: nowrap; }
-.status-Ciorna { color: #6b4c00; background: #fff4cf; }
-.status-Generata { color: #075985; background: #e0f2fe; }
-.status-Trimisa { color: #5b21b6; background: #ede9fe; }
-.status-Acceptata { color: #166534; background: #dcfce7; }
-.status-Respinsa { color: #991b1b; background: #fee2e2; }
-.offer-editor-view { margin-top: 0; }
-.offer-editor { padding: 14px; display: grid; gap: 14px; }
-.offer-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
-.offer-source { margin-top: 4px; color: var(--muted); font-size: 12px; }
-.offer-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
-.offer-table { min-width: 760px; }
-.offer-table th { position: static; }
-.offer-table td { padding: 7px 6px; }
-.offer-table input { min-height: 32px; }
-.offer-transport { display: grid; grid-template-columns: minmax(0, 1fr) 160px 170px; gap: 10px; align-items: end; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); }
-.offer-toggle { display: flex; align-items: center; gap: 8px; min-height: 36px; color: var(--ink); font-size: 13px; font-weight: 700; }
-.offer-toggle input { width: auto; min-height: 0; }
-.offer-summary { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px; border: 1px solid #9cc7e5; border-radius: 8px; background: #eff8ff; }
-.offer-summary span { color: #075985; font-size: 12px; font-weight: 800; text-transform: uppercase; }
-.offer-summary strong { font-size: 24px; color: #0c4a6e; }
-.offer-empty { padding: 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; }
-.offer-editor-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-@media (max-width: 850px) {
-  .offer-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .offer-transport { grid-template-columns: 1fr; align-items: stretch; }
-  .offer-summary strong { font-size: 20px; }
-  .offer-editor { padding: 12px; }
+﻿{
+  "name": "Calculator Oferta",
+  "short_name": "Oferta",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
