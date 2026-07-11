@@ -42,3 +42,9 @@
 
 .offer-observations { display: grid; gap: 6px; }
 .offer-observations textarea { width: 100%; min-height: 82px; resize: vertical; border: 1px solid var(--line); border-radius: 7px; background: var(--field); color: var(--ink); font: inherit; padding: 9px; }
+
+.offer-images { display: grid; gap: 10px; }
+.offer-image-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.offer-image-item { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--field); }
+.offer-image-item > strong { font-size: 14px; overflow-wrap: anywhere; }
+@media (max-width: 850px) { .offer-image-list { grid-template-columns: 1fr; } }
