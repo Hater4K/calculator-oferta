@@ -268,7 +268,7 @@
   <script src="firebase-config.js?v=20260711-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="offers.js?v=20260711-14"></script>
+  <script src="offers.js?v=20260711-15"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
@@ -345,8 +345,8 @@
       const bySignature = new Map();
 
       [...cloud.deals, ...local.deals].forEach(rawDeal => {
-        if (!rawDeal || deleted.has(rawDeal.id)) return;
-        const deal = isBlankInitialDeal(rawDeal) ? { ...rawDeal, id: 'default-offer-01' } : rawDeal;
+        if (!rawDeal || deleted.has(rawDeal.id) || isBlankInitialDeal(rawDeal)) return;
+        const deal = rawDeal;
         const existingById = byId.get(deal.id);
         if (existingById && dealStamp(existingById) > dealStamp(deal)) return;
 
@@ -376,7 +376,7 @@
       });
       const offers = Array.from(offerById.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
       return {
-        deals: deals.length ? deals : local.deals,
+        deals,
         offers,
         deletedDealIds: Array.from(deleted),
         deletedOfferIds: Array.from(deletedOffers),
@@ -401,17 +401,10 @@
         readSavedState('calculatorOfertaPartideBackup'),
         readSavedState('calculatorOfertaPartideLastGood')
       ].filter(Boolean).sort((a, b) => stateStamp(b) - stateStamp(a))[0];
-      if (saved && saved.deals.length) return saved;
+      if (saved) { saved.deals = saved.deals.filter(deal => !isBlankInitialDeal(deal)); return saved; }
 
       const migratedDeal = loadLegacyDeal();
-      return { updatedAt: new Date().toISOString(), deals: [migratedDeal || {
-        id: 'default-offer-01',
-        dealName: 'Oferta 01',
-        clientName: '',
-        deliveryAddress: '',
-        rows: cloneRows(),
-        updatedAt: new Date().toISOString()
-      }], deletedDealIds: [] };
+      return { updatedAt: new Date().toISOString(), deals: migratedDeal ? [migratedDeal] : [], offers: [], deletedDealIds: [], deletedOfferIds: [], offerSequence: 0 };
     }
 
     function loadLegacyDeal() {
