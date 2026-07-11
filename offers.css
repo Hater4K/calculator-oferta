@@ -39,3 +39,6 @@
   .offer-summary strong { font-size: 20px; }
   .offer-editor { padding: 12px; }
 }
+
+.offer-observations { display: grid; gap: 6px; }
+.offer-observations textarea { width: 100%; min-height: 82px; resize: vertical; border: 1px solid var(--line); border-radius: 7px; background: var(--field); color: var(--ink); font: inherit; padding: 9px; }
