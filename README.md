@@ -30,3 +30,13 @@ Pentru salvare online:
 3. Activeaza Firestore Database.
 4. Completeaza `firebase-config.js` cu datele tale.
 5. Incarca pe GitHub: `index.html`, `firebase-config.js`, `manifest.webmanifest`, `icon.svg`, `icon-180.png`, `icon-512.png`.
+
+
+## Oferte salvate
+
+Aplicatia include acum oferte salvate permanent in aceeasi stocare Firebase folosita de partide.
+
+- Dintr-o partida deschisa, foloseste butonul `Genereaza oferta`.
+- Ofertele apar in sectiunea `Oferte salvate`.
+- Poti vizualiza, edita, duplica, exporta PDF sau sterge o oferta.
+- Pentru update pe GitHub, incarca si fisierele noi: `offers.js`, `offers.css` si folderul `assets/`.

@@ -11,6 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="stylesheet" href="offers.css" />
   <style>
     :root {
       color-scheme: light;
@@ -262,6 +263,9 @@
   </main>
 
   <script src="firebase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="offers.js"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5 }];
@@ -300,7 +304,10 @@
     function withStateMeta(value) {
       return {
         deals: Array.isArray(value.deals) ? value.deals.map(normalizeDeal) : [],
+        offers: Array.isArray(value.offers) ? value.offers : [],
         deletedDealIds: Array.isArray(value.deletedDealIds) ? value.deletedDealIds : [],
+        deletedOfferIds: Array.isArray(value.deletedOfferIds) ? value.deletedOfferIds : [],
+        offerSequence: Math.max(0, num(value.offerSequence)),
         updatedAt: value.updatedAt || new Date().toISOString()
       };
     }
@@ -357,9 +364,20 @@
       });
 
       const deals = Array.from(byId.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
+      const deletedOffers = new Set([...(local.deletedOfferIds || []), ...(cloud.deletedOfferIds || [])]);
+      const offerById = new Map();
+      [...(cloud.offers || []), ...(local.offers || [])].forEach(offer => {
+        if (!offer || deletedOffers.has(offer.id)) return;
+        const existing = offerById.get(offer.id);
+        if (!existing || dealStamp(offer) >= dealStamp(existing)) offerById.set(offer.id, offer);
+      });
+      const offers = Array.from(offerById.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
       return {
         deals: deals.length ? deals : local.deals,
+        offers,
         deletedDealIds: Array.from(deleted),
+        deletedOfferIds: Array.from(deletedOffers),
+        offerSequence: Math.max(num(local.offerSequence), num(cloud.offerSequence)),
         updatedAt: new Date(Math.max(stateStamp(local), stateStamp(cloud), Date.now())).toISOString()
       };
     }
@@ -624,6 +642,7 @@
         ${archivedDeals.map(deal => dealCard(deal, true)).join('')}` : '';
 
       byId('dealsList').innerHTML = activeHtml + archivedHtml;
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.renderList) window.calculatorOfertaOffers.renderList();
     }
 
     function renderDealForm(deal) {
@@ -696,6 +715,7 @@
       byId('totalClient').textContent = money(totals.totalClient);
       byId('totalProfit').textContent = money(totals.profit);
       saveState();
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.onCalculator) window.calculatorOfertaOffers.onCalculator();
     }
 
     function createDeal() {
@@ -802,6 +822,18 @@
       a.click();
       URL.revokeObjectURL(url);
     });
+
+    window.calculatorOfertaApi = {
+      getState: () => state,
+      save: saveState,
+      getCurrentDeal: currentDeal,
+      calculate,
+      money,
+      num,
+      renderDeals,
+      renderCalculator
+    };
+    window.dispatchEvent(new Event('calculatorOfertaReady'));
 
     window.addEventListener('beforeunload', () => saveState(true));
     renderDeals();

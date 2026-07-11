@@ -1,19 +1,14 @@
-﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
-  <defs>
-    <linearGradient id="bg" x1="18" y1="14" x2="162" y2="166" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#07111f"/>
-      <stop offset="1" stop-color="#12343b"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="42" y1="40" x2="138" y2="140" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#14b8a6"/>
-      <stop offset="1" stop-color="#0f766e"/>
-    </linearGradient>
-  </defs>
-  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
-  <circle cx="90" cy="82" r="52" fill="none" stroke="url(#accent)" stroke-width="16" stroke-linecap="round" stroke-dasharray="250 95" transform="rotate(-35 90 82)"/>
-  <path d="M57 84h66" stroke="#f8fafc" stroke-width="12" stroke-linecap="round"/>
-  <path d="M113 66l23 18-23 18" fill="none" stroke="#f8fafc" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M123 110H57" stroke="#f8fafc" stroke-width="12" stroke-linecap="round"/>
-  <path d="M67 92l-23 18 23 18" fill="none" stroke="#f8fafc" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="90" y="153" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="1.2" fill="#f8fafc">CONNECT</text>
-</svg>
+﻿// Configuratie Firebase pentru Calculator Oferta.
+// Nu pune aici importurile Firebase; index.html le incarca separat.
+window.CALCULATOR_OFERTA_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBpOWszvJ7J4T3JblAvx7_dkRSA6jJ2uHA",
+  authDomain: "offer-manager-d67dd.firebaseapp.com",
+  projectId: "offer-manager-d67dd",
+  storageBucket: "offer-manager-d67dd.firebasestorage.app",
+  messagingSenderId: "933692838285",
+  appId: "1:933692838285:web:67a2bb52d27434a35e2dc4",
+  measurementId: "G-5Z1P1SB576"
+};
+
+// Toate dispozitivele care folosesc acelasi document vad aceleasi partide.
+window.CALCULATOR_OFERTA_FIREBASE_DOCUMENT = "connect-export-import";
