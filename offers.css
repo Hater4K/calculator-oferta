@@ -53,3 +53,5 @@
 .offer-image-control span { grid-column: 1 / -1; color: #0f766e; font-size: 12px; font-weight: 700; }
 .offer-image-control button { min-height: 36px; }
 @media (max-width: 560px) { .offer-image-control { grid-template-columns: 1fr; } }
+
+.offer-add-product { width: 100%; margin-top: 10px; min-height: 42px; }
