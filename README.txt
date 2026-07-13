@@ -1,0 +1,1 @@
+Actualizare vizuala`n`n- Toolbar compact pentru Adaos si Discount aplicat tuturor produselor.`n- Buton discret cu sageata pentru Inapoi la oferte.`n`nIncarca index.html peste cel existent in repository, apoi asteapta 1-2 minute si foloseste Ctrl+F5.
