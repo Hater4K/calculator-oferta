@@ -5,7 +5,7 @@
 - Produsele, preturile si transportul nu se modifica in oferta. Din oferta, apasa **Modifica partida**; orice modificare facuta acolo se transfera automat in oferta.
 - La generarea ofertei, partida se muta din lista activa, dar ramane legata de oferta si poate fi redeschisa din butonul de mai sus.
 
-# Calculator Oferta - GitHub Pages
+# Ofertare Connecteximp - GitHub Pages
 
 Folder pregatit pentru publicare pe GitHub Pages.
 

@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
-  <title>Calculator Oferta</title>
+  <title>Ofertare Connecteximp</title>
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Calculator Oferta" />
+  <meta name="apple-mobile-web-app-title" content="Ofertare Connecteximp" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -152,6 +152,8 @@
     .total-box strong { display: block; margin-top: 5px; font-size: 22px; }
     .sheet-wrap { overflow-x: hidden; }
     #addBottomBtn { width: 100%; margin-top: 10px; min-height: 42px; }
+    .deal-bottom-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .deal-bottom-actions button { min-height: 40px; }
     #calculatorView { min-height: 0; overflow: visible; }
     .discount-warning { margin-top: 10px; padding: 10px 12px; border: 1px solid #f0b8b8; border-radius: 7px; background: #fff5f5; color: #9b1c1c; font-weight: 700; font-size: 13px; }
     table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
@@ -171,12 +173,13 @@
     tbody tr:last-child td { border-bottom: 0; }
     td input, td select { min-height: 30px; font-size: 12px; padding: 5px 6px; }
     td button { min-height: 30px; padding: 5px 6px; font-size: 11px; }
-    .col-id { width: 4.8%; }
-    .col-product { width: 12.2%; }
-    .col-small { width: 5.8%; }
-    .col-money { width: 6.6%; }
-    .col-currency { width: 6%; }
-    .col-delete { width: 4.2%; }
+    .col-id { width: 4.2%; }
+    .col-sku { width: 8.5%; }
+    .col-product { width: 11.5%; }
+    .col-small { width: 5.4%; }
+    .col-money { width: 6.3%; }
+    .col-currency { width: 5.6%; }
+    .col-delete { width: 4%; }
     .money-cell { font-weight: 800; white-space: normal; overflow-wrap: anywhere; color: var(--ink); font-size: 12px; line-height: 1.2; }
     .mobile-products { display: none; }
     .row-card { padding: 16px; margin-bottom: 12px; }
@@ -204,6 +207,8 @@
       .brand-nav { min-width: 0; }
       .actions { justify-content: stretch; }
       .actions button { flex: 1 1 110px; min-height: 34px; padding: 7px 9px; font-size: 13px; }
+      .deal-bottom-actions { justify-content: stretch; }
+      .deal-bottom-actions button { flex: 1 1 120px; }
       .deals-head { align-items: stretch; flex-direction: column; }
       .deals-list { grid-template-columns: 1fr; }
       .rates { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -243,14 +248,11 @@
 <body>
   <header>
     <div class="topbar">
-      <div class="brand-nav"><button id="backBtn" hidden>Inapoi la oferte</button><h1>Calculator Oferta</h1></div><span id="syncStatus" class="sync-status">Local</span>
+      <div class="brand-nav"><button id="backBtn" hidden>Inapoi la oferte</button><h1>Ofertare Connecteximp</h1></div><span id="syncStatus" class="sync-status">Local</span>
       <div class="actions">
         <button class="primary" id="newDealBtn">Adauga partida</button>
         <button id="dealsArchiveBtn">Arhiva partide</button>
-        <button id="saveSourceOfferBtn" hidden>Inapoi la oferta</button>
         <button class="primary" id="addBtn" hidden>Adauga rand</button>
-        <button id="exportBtn" hidden>Export CSV</button>
-        <button class="danger" id="resetBtn" hidden>Reset</button>
       </div>
     </div>
   </header>
@@ -298,6 +300,7 @@
           <thead>
             <tr>
               <th class="col-id">Oferta</th>
+              <th class="col-sku">SKU</th>
               <th class="col-product">Produs</th>
               <th class="col-small">Bucati</th>
               <th class="col-small">Pret furnizor/buc</th>
@@ -319,6 +322,11 @@
         </table>
       </section>
       <button id="addBottomBtn" class="primary">Adauga rand</button>
+      <div id="dealBottomActions" class="deal-bottom-actions">
+        <button id="saveSourceOfferBtn" class="primary" hidden>Catre oferta</button>
+        <button id="exportBtn" hidden>Export CSV</button>
+        <button id="resetBtn" class="danger" hidden>Reset</button>
+      </div>
 
       <div id="discountWarning" class="discount-warning" hidden></div>
       <section class="mobile-products" id="mobileRows" aria-label="Produse"></section>
@@ -328,10 +336,10 @@
   <script src="firebase-config.js?v=20260711-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="offers.js?v=20260713-39"></script>
+  <script src="offers.js?v=20260713-40"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
-    const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
+    const initialRows = [{ offerId: 1, sku: '', product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
     let selectedDealId = null;
     let linkedOfferId = null;
     let dealsArchiveMode = false;
@@ -506,6 +514,7 @@
     function normalizeRows(sourceRows) {
       return sourceRows.map(row => ({
         offerId: row.offerId ?? 1,
+        sku: row.sku || '',
         product: row.product || '',
         quantity: num(row.quantity) || 0,
         supplierPrice: num(row.supplierPrice),
@@ -761,6 +770,7 @@
       byId('desktopRows').innerHTML = calculated.map((item, i) => `
         <tr>
           <td>${bareInput(i, 'offerId', 'number', '1')}</td>
+          <td>${bareInput(i, 'sku', 'text')}</td>
           <td>${bareInput(i, 'product', 'text')}</td>
           <td>${bareInput(i, 'quantity')}</td>
           <td>${bareInput(i, 'supplierPrice')}</td>
@@ -786,6 +796,7 @@
           </div>
           <div class="editor-grid">
             ${field(i, 'offerId', 'Oferta', 'number', '1')}
+            ${field(i, 'sku', 'SKU', 'text')}
             ${field(i, 'product', 'Produs', 'text')}
             ${field(i, 'quantity', 'Bucati')}
             ${field(i, 'supplierPrice', 'Pret furnizor/buc')}
@@ -923,7 +934,7 @@
       const deal = currentDeal();
       if (!deal) return;
       const next = Math.max(0, ...deal.rows.map(r => num(r.offerId))) + 1;
-      deal.rows.push({ offerId: next, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 });
+      deal.rows.push({ offerId: next, sku: '', product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 });
       touchDeal(deal);
       renderCalculator();
     });
