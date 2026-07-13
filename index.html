@@ -59,12 +59,6 @@
       font-size: 12px;
     }
     #backBtn::before { content: "\2190"; margin-right: 5px; font-size: 15px; line-height: 0; }
-    #backBtn.navigation-context-back {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #ffffff;
-      min-height: 38px;
-    }
     body.archive-navigation .brand-nav h1 { display: none; }
     body.archive-navigation #backBtn {
       min-height: 38px;
@@ -1053,42 +1047,6 @@
     });
     ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', () => { const deal = currentDeal(); if (deal) touchDeal(deal); renderCalculator(); }));
     byId('newDealBtn').addEventListener('click', createDeal);
-    function placeNavigationBackButton() {
-      const button = byId('backBtn');
-      const calculator = byId('calculatorView');
-      const offerEditor = byId('offerEditorView');
-      if (!button || !calculator) return;
-
-      if (!calculator.hidden) {
-        const target = byId('dealActions');
-        if (target && button.parentElement !== target) target.prepend(button);
-        button.classList.add('navigation-context-back');
-        button.hidden = false;
-        if (button.textContent !== 'Inapoi la partide') button.textContent = 'Inapoi la partide';
-        return;
-      }
-
-      if (offerEditor && !offerEditor.hidden) {
-        const target = offerEditor.querySelector('.offer-editor-actions');
-        if (target && button.parentElement !== target) target.prepend(button);
-        button.classList.add('navigation-context-back');
-        button.hidden = false;
-        if (button.textContent !== 'Inapoi la oferte') button.textContent = 'Inapoi la oferte';
-        return;
-      }
-
-      const brand = document.querySelector('.brand-nav');
-      if (brand && button.parentElement !== brand) brand.prepend(button);
-      button.classList.remove('navigation-context-back');
-      if (!document.body.classList.contains('archive-navigation')) button.hidden = true;
-    }
-
-    new MutationObserver(placeNavigationBackButton).observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['hidden', 'class']
-    });
     byId('backBtn').addEventListener('click', () => {
       if (linkedOfferId && window.calculatorOfertaOffers && window.calculatorOfertaOffers.openOffer) { const offerId = linkedOfferId; linkedOfferId = null; selectedDealId = null; window.calculatorOfertaOffers.openOffer(offerId, false); return; }
       selectedDealId = null;
