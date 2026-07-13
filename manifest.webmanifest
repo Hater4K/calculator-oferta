@@ -1,29 +1,1124 @@
-{
-  "name": "Ofertare Connecteximp",
-  "short_name": "Connecteximp",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f4f6f8",
-  "theme_color": "#0f172a",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-180.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Ofertare Connecteximp</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Ofertare Connecteximp" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="stylesheet" href="offers.css?v=20260713-32" />
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #64748b;
+      --line: #d7dee8;
+      --head: #0f172a;
+      --accent: #0f766e;
+      --danger: #b91c1c;
+      --field: #f8fafc;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-  ]
-}
+    * { box-sizing: border-box; }
+    html { overflow-y: scroll; }
+    body { min-height: 100vh; margin: 0; overflow-y: auto; background: var(--bg); color: var(--ink); }
+    [hidden] { display: none !important; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--head);
+      color: white;
+      padding: 12px 18px;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, .18);
+    }
+    .topbar {
+      max-width: 1500px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    .brand-nav { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    #backBtn {
+      flex: 0 0 auto;
+      min-height: 30px;
+      padding: 5px 8px;
+      border-color: rgba(255,255,255,.25);
+      background: rgba(255,255,255,.08);
+      color: #e2e8f0;
+      font-size: 12px;
+    }
+    #backBtn::before { content: "\2190"; margin-right: 5px; font-size: 15px; line-height: 0; }
+    body.archive-navigation .brand-nav h1 { display: none; }
+    body.archive-navigation #backBtn {
+      min-height: 38px;
+      padding: 8px 14px;
+      border-color: #ffffff;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 1px 2px rgba(15,23,42,.2);
+    }
+    body.archive-navigation #backBtn::before { font-size: 17px; }
+    .sync-status { border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 800; color: #d1fae5; background: rgba(15, 118, 110, .35); }
+    .sync-status.warn { color: #fef3c7; background: rgba(146, 64, 14, .35); }
+    .sync-status.error { color: #fee2e2; background: rgba(185, 28, 28, .35); }
+    h2 { margin: 0; font-size: 18px; }
+    main { max-width: 1500px; margin: 0 auto; padding: 16px; }
+    .toolbar, .deal, .totals, .sheet-wrap, .card, .deals-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+    }
+    .deals-panel { padding: 14px; display: grid; gap: 12px; }
+    .deals-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .deals-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+    .deals-list.archive-deals-list { grid-template-columns: 1fr; }
+    .deals-list.archive-deals-list .deal-card { grid-template-columns: 1fr auto; align-items: end; }
+    .deals-list.archive-deals-list .deal-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .deals-list.archive-deals-list .deal-actions { align-self: end; }
+    .deal-card { padding: 14px; display: grid; gap: 10px; }
+    .deal-card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+    .deal-meta { display: grid; gap: 5px; color: var(--muted); font-size: 13px; }
+    .deal-meta strong { color: var(--ink); }
+    .deal-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .archived-head { grid-column: 1 / -1; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line); }
+    .empty-state { padding: 18px; color: var(--muted); text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
+    .toolbar { padding: 14px; display: grid; gap: 10px; }
+    .bulk-pricing {
+      margin: 10px 0 14px;
+      padding: 10px 12px;
+      grid-template-columns: auto minmax(94px, 120px) minmax(94px, 120px) auto;
+      align-items: end;
+      gap: 8px;
+      background: #f8fafc;
+      box-shadow: none;
+    }
+    .bulk-pricing .toolbar-head { align-self: center; padding-right: 8px; }
+    .bulk-pricing .toolbar-head strong { font-size: 13px; white-space: nowrap; }
+    .bulk-pricing label { gap: 3px; font-size: 10px; }
+    .bulk-pricing input { min-height: 32px; }
+    .bulk-pricing button { min-height: 32px; padding: 6px 16px; font-size: 12px; }
+    .source-edit-notice { margin-top: 2px; padding: 9px 11px; border: 1px solid #9cc7e5; border-radius: 7px; background: #eff8ff; color: #075985; font-size: 13px; font-weight: 700; }
+    .deal { padding: 14px; display: grid; gap: 12px; margin-bottom: 14px; }
+    .deal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .deal-head strong, .toolbar-head strong { font-size: 15px; }
+    .deal-grid { display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 10px; }
+    .deal input { background: #ffffff; }
+    .rates { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 10px; max-width: 520px; }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    input, select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--field);
+      color: var(--ink);
+      font: inherit;
+      padding: 7px 9px;
+    }
+    input[type="number"] { text-align: right; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+      color: var(--ink);
+      font-weight: 700;
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+    button.archive { color: #7c5800; background: #fff7df; border-color: #f0d48a; }
+    button.danger { color: var(--danger); }
+    .totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 14px 0; overflow: hidden; }
+    .total-box { padding: 14px; border-right: 1px solid var(--line); }
+    .total-box:last-child { border-right: 0; }
+    .total-box span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .total-box strong { display: block; margin-top: 5px; font-size: 22px; }
+    .sheet-wrap { overflow-x: hidden; }
+    #addBottomBtn { width: 100%; margin-top: 10px; min-height: 42px; }
+    .customer-transport { margin-top: 10px; padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr) 160px 190px; gap: 10px; align-items: end; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+    .customer-transport .deal-head { grid-column: 1 / -1; }
+    .transport-toggle { display: flex; align-items: center; gap: 8px; min-height: 36px; color: var(--ink); font-size: 13px; }
+    .transport-toggle input { width: auto; min-height: 0; }
+    .party-offer-summary { margin-top: 10px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px; border: 1px solid #9cc7e5; border-radius: 8px; background: #eff8ff; }
+    .party-offer-summary span { color: #075985; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    .party-offer-summary strong { color: #0c4a6e; font-size: 16px; }
+    .party-offer-summary strong:last-child { font-size: 24px; }
+    .deal-editor-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .deal-editor-actions button { min-height: 38px; }
+    #calculatorView { min-height: 0; overflow: visible; }
+    .discount-warning { margin-top: 10px; padding: 10px 12px; border: 1px solid #f0b8b8; border-radius: 7px; background: #fff5f5; color: #9b1c1c; font-weight: 700; font-size: 13px; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+    th, td { border-bottom: 1px solid var(--line); padding: 6px 5px; vertical-align: middle; }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--head);
+      color: white;
+      font-size: 11px;
+      text-align: left;
+      white-space: normal;
+      line-height: 1.15;
+    }
+    tbody tr:nth-child(even) { background: #fbfdff; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td input, td select { min-height: 30px; font-size: 12px; padding: 5px 6px; }
+    td button { min-height: 30px; padding: 5px 6px; font-size: 11px; }
+    .deal-sku-image { display: grid; gap: 4px; min-width: 0; }
+    .deal-image-picker { display: grid; gap: 4px; min-width: 0; }
+    .deal-image-picker button { width: 100%; min-height: 28px; padding: 4px 5px; font-size: 10px; line-height: 1.1; }
+    .deal-product-thumb { display: block; width: 100%; max-height: 86px; object-fit: contain; border: 1px solid var(--line); border-radius: 5px; background: #fff; }    .col-id { width: 4.2%; }
+    .col-sku { width: 8.5%; }
+    .col-product { width: 11.5%; }
+    .col-small { width: 5.4%; }
+    .col-money { width: 6.3%; }
+    .col-currency { width: 5.6%; }
+    .col-delete { width: 4%; }
+    .money-cell { font-weight: 800; white-space: normal; overflow-wrap: anywhere; color: var(--ink); font-size: 12px; line-height: 1.2; }
+    .mobile-products { display: none; }
+    .row-card { padding: 16px; margin-bottom: 12px; }
+    .row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .row-head h2 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
+    .editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .result-list {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      background: var(--field);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .result-line { display: flex; justify-content: space-between; gap: 12px; }
+    .result-line span { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .result-line strong { font-size: 15px; white-space: nowrap; }
+    @media (max-width: 850px) {
+      header { padding: 10px 12px; }
+      main { padding: 10px; }
+      .topbar { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      h1 { font-size: 28px; }
+      .brand-nav { min-width: 0; }
+      .actions { justify-content: stretch; }
+      .actions button { flex: 1 1 110px; min-height: 34px; padding: 7px 9px; font-size: 13px; }
+      .deal-editor-actions { justify-content: stretch; width: 100%; }
+      .deal-editor-actions button { flex: 1 1 120px; }
+      .customer-transport { grid-template-columns: 1fr; }
+      .party-offer-summary strong:last-child { font-size: 20px; }
+      .deals-head { align-items: stretch; flex-direction: column; }
+      .deals-list { grid-template-columns: 1fr; }
+      .rates { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .bulk-pricing { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .bulk-pricing .toolbar-head, .bulk-pricing button { grid-column: 1 / -1; }
+      .bulk-pricing .toolbar-head { padding: 0; }
+      #backBtn { padding: 4px 7px; font-size: 11px; }
+      label { font-size: 10px; gap: 4px; }
+      input, select { min-height: 34px; padding: 6px 8px; font-size: 14px; }
+      .deal { padding: 12px; gap: 10px; }
+      .deal-grid { grid-template-columns: 1fr; gap: 8px; }
+      .totals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .total-box { border-right: 1px solid var(--line); border-bottom: 0; padding: 10px; }
+      .total-box span { font-size: 9px; }
+      .total-box strong { font-size: 15px; }
+      .total-box:last-child { border-right: 0; border-bottom: 0; }
+      .sheet-wrap { display: none; }
+      .mobile-products { display: block; }
+      .row-card { padding: 12px; margin-bottom: 10px; }
+      .deal-image-picker { grid-column: 1 / -1; }
+      .deal-image-picker button { min-height: 36px; font-size: 12px; }
+      .deal-product-thumb { max-height: 180px; }
+      .row-head { margin-bottom: 10px; }
+      .row-head h2 { font-size: 17px; }
+      .editor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .result-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; padding: 10px; }
+      .result-line { display: grid; gap: 2px; }
+      .result-line span { font-size: 9px; }
+      .result-line strong { font-size: 14px; }
+    }
+    @media (max-width: 520px) {
+      .rates { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .editor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .row-head { align-items: stretch; flex-direction: column; }
+      .result-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .result-line { display: grid; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand-nav"><button id="backBtn" hidden>Inapoi la oferte</button><h1>Ofertare Connecteximp</h1></div><span id="syncStatus" class="sync-status">Local</span>
+      <div class="actions">
+        <button class="primary" id="newDealBtn">Adauga partida</button>
+        <button id="dealsArchiveBtn">Arhiva partide</button>
+        <button class="primary" id="addBtn" hidden>Adauga rand</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section id="dealsView" class="deals-panel" aria-label="Partide oferta">
+      <div class="deals-head">
+        <h2 id="dealsTitle">Partide oferta</h2>
+      </div>
+      <div id="dealsList" class="deals-list"></div>
+    </section>
+
+    <section id="calculatorView" hidden>
+      <section class="deal" aria-label="Partida oferta">
+        <div class="deal-head">
+          <strong id="currentDealTitle">Partida oferta</strong>
+          <div id="dealActions" class="deal-editor-actions">
+            <button id="saveSourceOfferBtn" class="primary" hidden>Catre oferta</button>
+            <button id="exportBtn" hidden>Export CSV</button>
+            <button id="resetBtn" class="danger" hidden>Reset</button>
+          </div>
+        </div>
+        <div class="deal-grid">
+          <label>Partida <input id="dealName" type="text" placeholder="Ex: Oferta 01"></label>
+          <label>Client <input id="clientName" type="text" placeholder="Nume client"></label>
+          <label>Adresa livrare <input id="deliveryAddress" type="text" placeholder="Adresa de livrare"></label>
+        </div>
+        <div id="sourceEditNotice" class="source-edit-notice" hidden></div>
+      </section>
+
+      <section class="toolbar" aria-label="Setari curs valutar"><div class="toolbar-head"><strong>Curs</strong></div><div class="rates">
+          <label>PLN <input id="ratePLN" type="number" step="0.0001" value="1.25"></label>
+          <label>RON <input id="rateRON" type="number" step="0.0001" value="1"></label>
+          <label>EUR <input id="rateEUR" type="number" step="0.0001" value="5.35"></label>
+        </div>
+      </section>
+
+      <section class="toolbar bulk-pricing" aria-label="Aplicare adaos si discount">
+        <div class="toolbar-head"><strong>Aplica la toate produsele</strong></div>
+        <label>Adaos % <input id="bulkMarkup" type="number" min="0" step="0.1" placeholder="Ex: 12"></label>
+        <label>Discount % <input id="bulkDiscount" type="number" min="0" step="0.1" placeholder="Ex: 3"></label>
+        <button id="bulkApplyBtn" class="primary">Aplica</button>
+      </section>
+
+      <section class="totals" aria-label="Totaluri">
+        <div class="total-box"><span>Total cost</span><strong id="totalCost">0.00 lei</strong></div>
+        <div class="total-box"><span>Total client</span><strong id="totalClient">0.00 lei</strong></div>
+        <div class="total-box"><span>Profit estimat</span><strong id="totalProfit">0.00 lei</strong></div>
+      </section>
+
+      <section class="sheet-wrap" aria-label="Tabel produse">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">Oferta</th>
+              <th class="col-sku">SKU</th>
+              <th class="col-product">Produs</th>
+              <th class="col-small">Bucati</th>
+              <th class="col-small">Pret furnizor/buc</th>
+              <th class="col-currency">Moneda pret</th>
+              <th class="col-money">Pret produs in lei</th>
+              <th class="col-small">Transport</th>
+              <th class="col-currency">Moneda transport</th>
+              <th class="col-money">Transport in lei</th>
+              <th class="col-money">Cost final/buc</th>
+              <th class="col-money">Total cost</th>
+              <th class="col-small">Adaos %</th>
+              <th class="col-small">Discount %</th>
+              <th class="col-money">Pret client/buc</th>
+              <th class="col-money">Total client</th>
+              <th class="col-delete"></th>
+            </tr>
+          </thead>
+          <tbody id="desktopRows"></tbody>
+        </table>
+      </section>
+      <button id="addBottomBtn" class="primary">Adauga rand</button>
+      <section class="customer-transport" aria-label="Transport pentru client">
+        <div class="deal-head"><strong>Transport pentru client</strong></div>
+        <label class="transport-toggle"><input id="partyTransportApplies" type="checkbox"> Transport inclus</label>
+        <label>Valoare transport<input id="partyTransportAmount" type="number" min="0" step="0.01"></label>
+        <label class="transport-toggle"><input id="partyTransportSeparate" type="checkbox"> Factureaza transport separat</label>
+      </section>
+      <section class="party-offer-summary" aria-label="Total final oferta">
+        <span>Total fara TVA</span><strong id="partyOfferNet">0.00 lei</strong>
+        <span>TVA (21%)</span><strong id="partyOfferVat">0.00 lei</strong>
+        <span>Total de plata</span><strong id="partyOfferGross">0.00 lei</strong>
+      </section>
+
+      <div id="discountWarning" class="discount-warning" hidden></div>
+      <section class="mobile-products" id="mobileRows" aria-label="Produse"></section>
+    </section>
+  </main>
+
+  <script src="firebase-config.js?v=20260711-2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="offers.js?v=20260713-43"></script>
+  <script type="module">
+    const currencies = ['PLN', 'RON', 'EUR'];
+    const initialRows = [{ offerId: 1, sku: '', images: [], product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
+    let selectedDealId = null;
+    let linkedOfferId = null;
+    let dealsArchiveMode = false;
+    let state = loadState();
+    let firebaseDb = null;
+    let firebaseDocRef = null;
+    let firebaseFns = null;
+    let firebaseReady = false;
+    let cloudSaveTimer = null;
+    let applyingCloudState = false;
+
+    const byId = id => document.getElementById(id);
+    const money = value => `${Number(value || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} lei`;
+    const num = value => Number(String(value ?? '').replace(',', '.')) || 0;
+    const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+    function cloneRows() { return JSON.parse(JSON.stringify(initialRows)); }
+
+    function makeDeal(name = '') {
+      const index = state && state.deals ? state.deals.length + 1 : 1;
+      return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        dealName: name || `Oferta ${String(index).padStart(2, '0')}`,
+        clientName: '',
+        deliveryAddress: '',
+        offerTransport: { applies: false, amount: 0, separate: false },
+        rows: cloneRows(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function stateStamp(value) {
+      const stamp = value && value.updatedAt ? Date.parse(value.updatedAt) : 0;
+      return Number.isFinite(stamp) ? stamp : 0;
+    }
+
+    function withStateMeta(value) {
+      return {
+        deals: Array.isArray(value.deals) ? value.deals.map(normalizeDeal) : [],
+        offers: Array.isArray(value.offers) ? value.offers : [],
+        deletedDealIds: Array.isArray(value.deletedDealIds) ? value.deletedDealIds : [],
+        deletedOfferIds: Array.isArray(value.deletedOfferIds) ? value.deletedOfferIds : [],
+        offerSequence: Math.max(0, num(value.offerSequence)),
+        updatedAt: value.updatedAt || new Date().toISOString()
+      };
+    }
+
+    function dealStamp(deal) {
+      const stamp = deal && deal.updatedAt ? Date.parse(deal.updatedAt) : 0;
+      return Number.isFinite(stamp) ? stamp : 0;
+    }
+
+    function syncLinkedOffer(deal) {
+      const offersApp = window.calculatorOfertaOffers;
+      if (deal && linkedOfferId && offersApp && offersApp.syncFromDeal) offersApp.syncFromDeal(deal, linkedOfferId);
+    }
+
+    function touchDeal(deal) {
+      if (!deal) return;
+      deal.updatedAt = new Date().toISOString();
+      syncLinkedOffer(deal);
+    }
+
+    function dealSignature(deal) {
+      return JSON.stringify({
+        name: deal.dealName || '',
+        client: deal.clientName || '',
+        address: deal.deliveryAddress || '',
+        rows: deal.rows || []
+      });
+    }
+
+    function isBlankInitialDeal(deal) {
+      return deal.dealName === 'Oferta 01' && !deal.clientName && !deal.deliveryAddress && dealSignature(deal) === dealSignature(normalizeDeal({ id: 'default-offer-01', dealName: 'Oferta 01', rows: cloneRows() }));
+    }
+
+    function mergeStates(localState, cloudState) {
+      const local = withStateMeta(localState || { deals: [] });
+      const cloud = withStateMeta(cloudState || { deals: [] });
+      const deleted = new Set([...(local.deletedDealIds || []), ...(cloud.deletedDealIds || [])]);
+      const byId = new Map();
+      const bySignature = new Map();
+
+      [...cloud.deals, ...local.deals].forEach(rawDeal => {
+        if (!rawDeal || deleted.has(rawDeal.id) || isBlankInitialDeal(rawDeal)) return;
+        const deal = rawDeal;
+        const existingById = byId.get(deal.id);
+        if (existingById && dealStamp(existingById) > dealStamp(deal)) return;
+
+        const signature = dealSignature(deal);
+        const existingSignatureId = bySignature.get(signature);
+        if (existingSignatureId) {
+          const existing = byId.get(existingSignatureId);
+          if (!existing || dealStamp(deal) >= dealStamp(existing)) {
+            byId.delete(existingSignatureId);
+            byId.set(deal.id, deal);
+            bySignature.set(signature, deal.id);
+          }
+          return;
+        }
+
+        byId.set(deal.id, deal);
+        bySignature.set(signature, deal.id);
+      });
+
+      const deals = Array.from(byId.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
+      const deletedOffers = new Set([...(local.deletedOfferIds || []), ...(cloud.deletedOfferIds || [])]);
+      const offerById = new Map();
+      [...(cloud.offers || []), ...(local.offers || [])].forEach(offer => {
+        if (!offer || deletedOffers.has(offer.id)) return;
+        const existing = offerById.get(offer.id);
+        if (!existing || dealStamp(offer) >= dealStamp(existing)) offerById.set(offer.id, offer);
+      });
+      const offers = Array.from(offerById.values()).sort((a, b) => dealStamp(b) - dealStamp(a));
+      return {
+        deals,
+        offers,
+        deletedDealIds: Array.from(deleted),
+        deletedOfferIds: Array.from(deletedOffers),
+        offerSequence: Math.max(num(local.offerSequence), num(cloud.offerSequence)),
+        updatedAt: new Date(Math.max(stateStamp(local), stateStamp(cloud), Date.now())).toISOString()
+      };
+    }
+
+    function readSavedState(key) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key));
+        if (saved && Array.isArray(saved.deals)) return withStateMeta(saved);
+      } catch {
+        return null;
+      }
+      return null;
+    }
+
+    function loadState() {
+      const saved = [
+        readSavedState('calculatorOfertaPartide'),
+        readSavedState('calculatorOfertaPartideBackup'),
+        readSavedState('calculatorOfertaPartideLastGood')
+      ].filter(Boolean).sort((a, b) => stateStamp(b) - stateStamp(a))[0];
+      if (saved) { saved.deals = saved.deals.filter(deal => !isBlankInitialDeal(deal)); return saved; }
+
+      const migratedDeal = loadLegacyDeal();
+      return { updatedAt: new Date().toISOString(), deals: migratedDeal ? [migratedDeal] : [], offers: [], deletedDealIds: [], deletedOfferIds: [], offerSequence: 0 };
+    }
+
+    function loadLegacyDeal() {
+      try {
+        const legacyRows = JSON.parse(localStorage.getItem('calculatorOfertaRows'));
+        const legacyDeal = JSON.parse(localStorage.getItem('calculatorOfertaDeal')) || {};
+        if (!legacyRows && !legacyDeal.dealName && !legacyDeal.clientName && !legacyDeal.deliveryAddress) return null;
+        return normalizeDeal({
+          id: `${Date.now()}-migrated`,
+          dealName: legacyDeal.dealName || 'Oferta 01',
+          clientName: legacyDeal.clientName || '',
+          deliveryAddress: legacyDeal.deliveryAddress || '',
+          rows: legacyRows || cloneRows()
+        });
+      } catch { return null; }
+    }
+
+    function normalizeDeal(deal) {
+      return {
+        id: deal.id || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        dealName: deal.dealName || 'Oferta fara nume',
+        clientName: deal.clientName || '',
+        deliveryAddress: deal.deliveryAddress || '',
+        offerTransport: { applies: !!(deal.offerTransport && deal.offerTransport.applies), amount: Math.max(0, num(deal.offerTransport && deal.offerTransport.amount)), separate: !!(deal.offerTransport && deal.offerTransport.separate) },
+        rows: normalizeRows(Array.isArray(deal.rows) ? deal.rows : cloneRows()),
+        archivedAt: deal.archivedAt || '',
+        updatedAt: deal.updatedAt || new Date().toISOString()
+      };
+    }
+
+    function normalizeRows(sourceRows) {
+      return sourceRows.map(row => ({
+        offerId: row.offerId ?? 1,
+        sku: row.sku || '',
+        images: Array.isArray(row.images) ? row.images.slice(0, 2).map(String) : [],
+        product: row.product || '',
+        quantity: num(row.quantity) || 0,
+        supplierPrice: num(row.supplierPrice),
+        productCurrency: currencies.includes(row.productCurrency) ? row.productCurrency : 'EUR',
+        transport: num(row.transport),
+        transportCurrency: currencies.includes(row.transportCurrency) ? row.transportCurrency : 'EUR',
+        markup: num(row.markup) > 0 && num(row.markup) < 1 ? num(row.markup) * 100 : num(row.markup),
+        discount: Math.max(0, num(row.discount))
+      }));
+    }
+
+    function saveState(skipCloud = false) {
+      state.updatedAt = new Date().toISOString();
+      const payload = JSON.stringify(state);
+      try {
+        localStorage.setItem('calculatorOfertaPartide', payload);
+        localStorage.setItem('calculatorOfertaPartideBackup', payload);
+        if (state.deals.length) localStorage.setItem('calculatorOfertaPartideLastGood', payload);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('LocalStorage eroare', 'error', error && error.message ? error.message : String(error));
+      }
+      if (skipCloud) return;
+      scheduleCloudSave();
+    }
+
+    function firebaseErrorText(error) {
+      const code = error && error.code ? String(error.code) : '';
+      const message = error && error.message ? String(error.message) : String(error || 'eroare necunoscuta');
+      if (code.includes('permission-denied')) return 'Firebase: reguli blocate';
+      if (code.includes('unavailable')) return 'Firebase: indisponibil';
+      if (message.includes('Failed to fetch dynamically imported module')) return 'Firebase: SDK nu se incarca';
+      return 'Firebase eroare';
+    }
+
+    function setSyncStatus(text, kind = '', detail = '') {
+      const el = byId('syncStatus');
+      el.textContent = text;
+      el.title = detail || text;
+      el.className = `sync-status ${kind}`.trim();
+    }
+
+    function hasFirebaseConfig() {
+      const cfg = window.CALCULATOR_OFERTA_FIREBASE_CONFIG;
+      return cfg && cfg.apiKey && cfg.projectId && !String(cfg.apiKey).includes('PUNE_');
+    }
+
+    async function initFirebaseSync() {
+      if (!hasFirebaseConfig()) {
+        setSyncStatus('Local - fara config Firebase', 'warn', 'Nu gasesc firebase-config.js?v=20260711-2 configurat pe site. Urca firebase-config.js?v=20260711-2 langa index.html.');
+        return;
+      }
+      try {
+        const [appModule, firestoreModule] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+        ]);
+        firebaseFns = firestoreModule;
+        const app = appModule.initializeApp(window.CALCULATOR_OFERTA_FIREBASE_CONFIG);
+        firebaseDb = firestoreModule.getFirestore(app);
+        firebaseDocRef = firestoreModule.doc(firebaseDb, 'calculatorOferta', window.CALCULATOR_OFERTA_FIREBASE_DOCUMENT || 'connect-export-import');
+        try { await firestoreModule.enableIndexedDbPersistence(firebaseDb); } catch {}
+        firebaseReady = true;
+        setSyncStatus('Firebase: conectare...', 'warn');
+        await loadCloudState();
+        setSyncStatus('Firebase: salvat');
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(firebaseErrorText(error), 'error', error && error.message ? error.message : String(error));
+      }
+    }
+
+    async function loadCloudState() {
+      if (!firebaseReady || !firebaseDocRef) return;
+      const snapshot = await firebaseFns.getDoc(firebaseDocRef);
+      if (snapshot.exists() && snapshot.data().state && Array.isArray(snapshot.data().state.deals)) {
+        const cloudState = withStateMeta(snapshot.data().state);
+        applyingCloudState = true;
+        state = mergeStates(state, cloudState);
+        saveState(true);
+        selectedDealId = null;
+        applyingCloudState = false;
+        renderDeals();
+        await saveCloudStateNow();
+        return;
+      }
+      await saveCloudStateNow();
+    }
+
+    function scheduleCloudSave() {
+      if (applyingCloudState || !firebaseReady || !firebaseDocRef) return;
+      clearTimeout(cloudSaveTimer);
+      setSyncStatus('Firebase: se salveaza...', 'warn');
+      cloudSaveTimer = setTimeout(saveCloudStateNow, 600);
+    }
+
+    async function saveCloudStateNow() {
+      if (!firebaseReady || !firebaseDocRef) return;
+      try {
+        state.updatedAt = state.updatedAt || new Date().toISOString();
+        await firebaseFns.setDoc(firebaseDocRef, {
+          state,
+          updatedAt: state.updatedAt
+        }, { merge: true });
+        setSyncStatus('Firebase: salvat');
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(firebaseErrorText(error), 'error', error && error.message ? error.message : String(error));
+      }
+    }
+    function currentDeal() { return state.deals.find(deal => deal.id === selectedDealId) || null; }
+    function getDeal(id) { return state.deals.find(deal => deal.id === id) || null; }
+    function isDealActive(id) { const deal = getDeal(id); return !!deal && !deal.archivedAt; }
+    function archiveDeal(id) { const deal = getDeal(id); if (!deal || deal.archivedAt) return false; deal.archivedAt = new Date().toISOString(); touchDeal(deal); saveState(); return true; }
+    function openDealForOffer(dealId, offerId) {
+      const deal = getDeal(dealId); if (!deal) return false;
+      const offer = state.offers.find(item => item.id === offerId);
+      const currentTransport = deal.offerTransport || { applies: false, amount: 0, separate: false };
+      if (offer && offer.transport && !currentTransport.applies && !num(currentTransport.amount) && !currentTransport.separate && (offer.transport.applies || num(offer.transport.amount) || offer.transport.separate)) {
+        deal.offerTransport = { applies: !!offer.transport.applies, amount: Math.max(0, num(offer.transport.amount)), separate: !!offer.transport.separate };
+        touchDeal(deal);
+      }
+      selectedDealId = dealId; linkedOfferId = offerId; renderCalculator(); return true;
+    }
+    function currentRows() { return currentDeal()?.rows || []; }
+    function rates() { return { PLN: num(byId('ratePLN').value), RON: num(byId('rateRON').value), EUR: num(byId('rateEUR').value) }; }
+
+    function calculate(deal = currentDeal()) {
+      if (!deal) return [];
+      const rows = deal.rows;
+      const r = rates();
+      const transportByOffer = {};
+      const weightedByOffer = {};
+      rows.forEach(row => {
+        const productLei = num(row.supplierPrice) * r[row.productCurrency];
+        const transportLei = num(row.transport) * r[row.transportCurrency];
+        transportByOffer[row.offerId] = (transportByOffer[row.offerId] || 0) + transportLei;
+        weightedByOffer[row.offerId] = (weightedByOffer[row.offerId] || 0) + productLei * num(row.quantity);
+      });
+      return rows.map(row => {
+        const productLei = num(row.supplierPrice) * r[row.productCurrency];
+        const transportLei = num(row.transport) * r[row.transportCurrency];
+        const denominator = weightedByOffer[row.offerId] || 0;
+        const unitCost = denominator === 0 ? 0 : productLei + ((transportByOffer[row.offerId] || 0) * productLei / denominator);
+        const totalCost = unitCost * num(row.quantity);
+        const requestedDiscount = num(row.discount);
+        const appliedDiscount = requestedDiscount > 0 && requestedDiscount < num(row.markup) ? requestedDiscount : 0;
+        const clientUnit = unitCost * (1 + (num(row.markup) / 100)) * (1 - (appliedDiscount / 100));
+        const clientTotal = clientUnit * num(row.quantity);
+        return { row, productLei, transportLei, unitCost, totalCost, clientUnit, clientTotal, requestedDiscount, appliedDiscount };
+      });
+    }
+
+    function totalsFor(deal) {
+      const calc = calculate(deal);
+      const totalCost = calc.reduce((sum, item) => sum + item.totalCost, 0);
+      const productsTotal = calc.reduce((sum, item) => sum + item.clientTotal, 0);
+      const transport = deal.offerTransport || { applies: false, amount: 0, separate: false };
+      const transportCharge = transport.applies && transport.separate ? Math.max(0, num(transport.amount)) : 0;
+      const totalClient = productsTotal + transportCharge;
+      const vatAmount = totalClient * 0.21;
+      return { totalCost, productsTotal, transportCharge, totalClient, vatAmount, totalWithVat: totalClient + vatAmount, profit: totalClient - totalCost };
+    }
+
+    function bareInput(rowIndex, field, type = 'number', step = '0.01') {
+      const row = currentRows()[rowIndex] || {};
+      const value = row[field] ?? '';
+      return `<input type="${type}" ${type === 'number' ? `step="${step}"` : ''} value="${esc(value)}" data-row="${rowIndex}" data-field="${field}">`;
+    }
+
+    function dealImagePicker(rowIndex) {
+      const row = currentRows()[rowIndex] || {};
+      const hasImage = !!(row.images && row.images[0]);
+      return `<div class="deal-image-picker"><button type="button" data-pick-deal-image="${rowIndex}">${hasImage ? 'Schimba poza' : 'Alege poza'}</button><img id="dealImagePreview-${rowIndex}" class="deal-product-thumb" alt="" hidden></div>`;
+    }
+
+    function dealSkuImageCell(rowIndex) {
+      return `<div class="deal-sku-image">${bareInput(rowIndex, 'sku', 'text')}${dealImagePicker(rowIndex)}</div>`;
+    }
+
+    async function hydrateDealImagePreviews(deal) {
+      const offersApp = window.calculatorOfertaOffers;
+      if (!offersApp || !offersApp.imageSource) return;
+      for (let index = 0; index < deal.rows.length; index += 1) {
+        const image = deal.rows[index].images && deal.rows[index].images[0];
+        const target = byId(`dealImagePreview-${index}`);
+        if (!image || !target) continue;
+        const source = await offersApp.imageSource(image);
+        const current = byId(`dealImagePreview-${index}`);
+        if (!source || !current) continue;
+        current.src = source;
+        current.hidden = false;
+      }
+    }
+    function field(rowIndex, fieldName, label, type = 'number', step = '0.01') {
+      return `<label>${label}${bareInput(rowIndex, fieldName, type, step)}</label>`;
+    }
+
+    function barePicker(rowIndex, fieldName) {
+      const row = currentRows()[rowIndex] || {};
+      const value = row[fieldName];
+      return `<select data-row="${rowIndex}" data-field="${fieldName}">${currencies.map(c => `<option value="${c}" ${c === value ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
+    }
+
+    function picker(rowIndex, fieldName, label) {
+      return `<label>${label}${barePicker(rowIndex, fieldName)}</label>`;
+    }
+
+    function dealCard(deal, archived = false) {
+      hydrateDealImagePreviews(deal);
+      const totals = totalsFor(deal);
+      return `
+        <article class="card deal-card">
+          <h3>${esc(deal.dealName)}</h3>
+          <div class="deal-meta">
+            <span>Client: <strong>${esc(deal.clientName) || '-'}</strong></span>
+            <span>Adresa: <strong>${esc(deal.deliveryAddress) || '-'}</strong></span>
+            <span>Total client: <strong>${money(totals.totalClient)}</strong></span>
+          </div>
+          <div class="deal-actions">
+            ${archived ? '' : `<button class="primary" data-open-deal="${esc(deal.id)}">Deschide</button>`}
+            ${archived ? `<button class="primary" data-restore-deal="${esc(deal.id)}">Restaureaza</button>` : `<button class="archive" data-archive-deal="${esc(deal.id)}">Arhiveaza</button>`}
+            <button class="danger" data-delete-deal="${esc(deal.id)}">Sterge</button>
+          </div>
+        </article>`;
+    }
+
+    function renderDeals() {
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.closeArchive) window.calculatorOfertaOffers.closeArchive();
+      document.body.classList.toggle('archive-navigation', dealsArchiveMode);
+      byId('dealsView').hidden = false;
+      byId('calculatorView').hidden = true;
+      byId('backBtn').hidden = !dealsArchiveMode;
+      byId('backBtn').textContent = 'Inapoi la partide';
+      byId('newDealBtn').hidden = dealsArchiveMode;
+      byId('dealsArchiveBtn').hidden = dealsArchiveMode;
+      byId('addBtn').hidden = true;
+      byId('exportBtn').hidden = true;
+      byId('resetBtn').hidden = true;
+      if (byId('offersArchiveBtn')) byId('offersArchiveBtn').hidden = dealsArchiveMode;
+
+      const activeDeals = state.deals.filter(deal => !deal.archivedAt);
+      const archivedDeals = state.deals.filter(deal => deal.archivedAt);
+      const shownDeals = dealsArchiveMode ? archivedDeals : activeDeals;
+      byId('dealsTitle').textContent = dealsArchiveMode ? 'Partide arhivate' : 'Partide oferta';
+      byId('dealsArchiveBtn').textContent = 'Arhiva partide';
+      byId('dealsList').classList.toggle('archive-deals-list', dealsArchiveMode);
+      byId('dealsList').innerHTML = shownDeals.length
+        ? shownDeals.map(deal => dealCard(deal, dealsArchiveMode)).join('')
+        : '<div class="empty-state">'+(dealsArchiveMode ? 'Nu exista partide arhivate.' : 'Nu exista partide active.')+'</div>';
+      if (dealsArchiveMode) {
+        if (byId('offersView')) byId('offersView').hidden = true;
+        if (byId('offerEditorView')) byId('offerEditorView').hidden = true;
+      } else if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.renderList) {
+        window.calculatorOfertaOffers.renderList();
+      }
+    }
+
+    function renderDealForm(deal) {
+      byId('currentDealTitle').textContent = deal.dealName || 'Partida oferta';
+      byId('dealName').value = deal.dealName || '';
+      byId('clientName').value = deal.clientName || '';
+      byId('deliveryAddress').value = deal.deliveryAddress || '';
+    }
+
+    function renderCalculator() {
+      const deal = currentDeal();
+      if (!deal) { renderDeals(); return; }
+      document.body.classList.remove('archive-navigation');
+      byId('dealsView').hidden = true;
+      byId('calculatorView').hidden = false;
+      document.documentElement.style.overflowY = 'auto';
+      document.body.style.overflowY = 'auto';
+      byId('backBtn').hidden = false;
+      byId('newDealBtn').hidden = true;
+      byId('dealsArchiveBtn').hidden = true;
+      byId('addBtn').hidden = true;
+      byId('exportBtn').hidden = false;
+      byId('resetBtn').hidden = false;
+      if (byId('offersArchiveBtn')) byId('offersArchiveBtn').hidden = true;
+      renderDealForm(deal);
+      const linkedOffer = linkedOfferId && state.offers.find(offer => offer.id === linkedOfferId);
+      byId('sourceEditNotice').hidden = !linkedOffer;
+      byId('sourceEditNotice').textContent = linkedOffer ? 'Modifici partida sursa pentru oferta ' + linkedOffer.number + '. Modificarile se transfera automat in oferta.' : '';
+      byId('saveSourceOfferBtn').hidden = !linkedOffer;
+      const bulkMarkup = byId('bulkMarkup'), bulkDiscount = byId('bulkDiscount');
+      if (document.activeElement !== bulkMarkup) bulkMarkup.value = deal.rows.length ? num(deal.rows[0].markup) : '';
+      if (document.activeElement !== bulkDiscount) bulkDiscount.value = deal.rows.length ? num(deal.rows[0].discount) : '';
+
+      const calculated = calculate(deal);
+      byId('desktopRows').innerHTML = calculated.map((item, i) => `
+        <tr>
+          <td>${bareInput(i, 'offerId', 'number', '1')}</td>
+          <td>${dealSkuImageCell(i)}</td>
+          <td>${bareInput(i, 'product', 'text')}</td>
+          <td>${bareInput(i, 'quantity')}</td>
+          <td>${bareInput(i, 'supplierPrice')}</td>
+          <td>${barePicker(i, 'productCurrency')}</td>
+          <td class="money-cell">${money(item.productLei)}</td>
+          <td>${bareInput(i, 'transport')}</td>
+          <td>${barePicker(i, 'transportCurrency')}</td>
+          <td class="money-cell">${money(item.transportLei)}</td>
+          <td class="money-cell">${money(item.unitCost)}</td>
+          <td class="money-cell">${money(item.totalCost)}</td>
+          <td>${bareInput(i, 'markup', 'number', '0.1')}</td>
+          <td>${bareInput(i, 'discount', 'number', '0.1')}</td>
+          <td class="money-cell">${money(item.clientUnit)}</td>
+          <td class="money-cell">${money(item.clientTotal)}</td>
+          <td><button class="danger" data-delete="${i}">Sterge</button></td>
+        </tr>`).join('');
+
+      byId('mobileRows').innerHTML = calculated.map((item, i) => `
+        <article class="card row-card">
+          <div class="row-head">
+            <h2>${esc(deal.rows[i].product) || 'Produs fara nume'}</h2>
+            <button class="danger" data-delete="${i}">Sterge produs</button>
+          </div>
+          <div class="editor-grid">
+            ${field(i, 'offerId', 'Oferta', 'number', '1')}
+            ${field(i, 'sku', 'SKU', 'text')}
+            ${dealImagePicker(i)}
+            ${field(i, 'product', 'Produs', 'text')}
+            ${field(i, 'quantity', 'Bucati')}
+            ${field(i, 'supplierPrice', 'Pret furnizor/buc')}
+            ${picker(i, 'productCurrency', 'Moneda pret')}
+            ${field(i, 'transport', 'Transport total')}
+            ${picker(i, 'transportCurrency', 'Moneda transport')}
+            ${field(i, 'markup', 'Adaos produs (%)', 'number', '0.1')}
+            ${field(i, 'discount', 'Discount (%)', 'number', '0.1')}
+          </div>
+          <div class="result-list">
+            <div class="result-line"><span>Pret produs in lei</span><strong>${money(item.productLei)}</strong></div>
+            <div class="result-line"><span>Transport in lei</span><strong>${money(item.transportLei)}</strong></div>
+            <div class="result-line"><span>Cost final/buc</span><strong>${money(item.unitCost)}</strong></div>
+            <div class="result-line"><span>Total cost</span><strong>${money(item.totalCost)}</strong></div>
+            <div class="result-line"><span>Pret client/buc</span><strong>${money(item.clientUnit)}</strong></div>
+            <div class="result-line"><span>Total client</span><strong>${money(item.clientTotal)}</strong></div>
+          </div>
+        </article>`).join('');
+
+      hydrateDealImagePreviews(deal);
+      const totals = totalsFor(deal);
+      const invalidDiscounts = deal.rows.filter(row => num(row.discount) > 0 && num(row.discount) >= num(row.markup));
+      const warning = byId('discountWarning');
+      warning.hidden = invalidDiscounts.length === 0;
+      warning.textContent = invalidDiscounts.length ? 'Atentie: Discountul trebuie sa fie mai mic decat adaosul pentru: ' + invalidDiscounts.map(row => row.product || 'produs fara nume').join(', ') + '. Discountul nu a fost aplicat.' : '';
+      byId('totalCost').textContent = money(totals.totalCost);
+      byId('totalClient').textContent = money(totals.totalClient);
+      byId('totalProfit').textContent = money(totals.profit);
+      const offerTransport = deal.offerTransport || { applies: false, amount: 0, separate: false };
+      byId('partyTransportApplies').checked = !!offerTransport.applies;
+      byId('partyTransportAmount').value = num(offerTransport.amount);
+      byId('partyTransportAmount').disabled = !offerTransport.applies;
+      byId('partyTransportSeparate').checked = !!offerTransport.separate;
+      byId('partyTransportSeparate').disabled = !offerTransport.applies;
+      byId('partyOfferNet').textContent = money(totals.totalClient);
+      byId('partyOfferVat').textContent = money(totals.vatAmount);
+      byId('partyOfferGross').textContent = money(totals.totalWithVat);
+      saveState();
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.onCalculator) window.calculatorOfertaOffers.onCalculator();
+      if (linkedOfferId && byId('generateOfferBtn')) byId('generateOfferBtn').hidden = true;
+    }
+
+    function createDeal() {
+      dealsArchiveMode = false;
+      const deal = makeDeal();
+      state.deals.unshift(deal);
+      selectedDealId = deal.id;
+      saveState();
+      renderCalculator();
+    }
+
+    ['dealName', 'clientName', 'deliveryAddress'].forEach(id => byId(id).addEventListener('input', event => {
+      const deal = currentDeal();
+      if (!deal) return;
+      deal[id] = event.target.value;
+      touchDeal(deal);
+      saveState();
+      byId('currentDealTitle').textContent = deal.dealName || 'Partida oferta';
+    }));
+
+    document.body.addEventListener('change', event => {
+      const el = event.target;
+      if (!el.dataset || el.dataset.row === undefined) return;
+      const deal = currentDeal();
+      if (!deal) return;
+      const row = deal.rows[Number(el.dataset.row)];
+      const fieldName = el.dataset.field;
+      row[fieldName] = el.type === 'number' ? num(el.value) : el.value;
+      touchDeal(deal);
+      renderCalculator();
+    });
+
+    document.body.addEventListener('click', event => {
+      const target = event.target;
+      if (target.dataset.pickDealImage !== undefined) {
+        const deal = currentDeal();
+        const rowIndex = Number(target.dataset.pickDealImage);
+        if (!deal || !deal.rows[rowIndex]) return;
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async () => {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          const offersApp = window.calculatorOfertaOffers;
+          if (!offersApp || !offersApp.uploadImage) { alert('Serviciul de incarcare poze nu este pregatit. Incearca din nou.'); return; }
+          target.disabled = true;
+          target.textContent = 'Se incarca...';
+          try {
+            const reference = await offersApp.uploadImage(file);
+            if (!reference) { target.disabled = false; target.textContent = 'Alege poza'; return; }
+            deal.rows[rowIndex].images = [reference];
+            touchDeal(deal);
+            renderCalculator();
+          } catch (error) {
+            alert('Poza nu s-a putut incarca. ' + (error && error.message ? error.message : ''));
+            target.disabled = false;
+            target.textContent = 'Alege poza';
+          }
+        };
+        input.click();
+        return;
+      }      if (target.dataset.openDeal) {
+        selectedDealId = target.dataset.openDeal;
+        renderCalculator();
+        return;
+      }
+      if (target.dataset.archiveDeal) {
+        const deal = state.deals.find(item => item.id === target.dataset.archiveDeal);
+        if (!deal) return;
+        deal.archivedAt = new Date().toISOString();
+        touchDeal(deal);
+        saveState();
+        renderDeals();
+        return;
+      }
+      if (target.dataset.restoreDeal) {
+        const deal = state.deals.find(item => item.id === target.dataset.restoreDeal);
+        if (!deal) return;
+        deal.archivedAt = '';
+        touchDeal(deal);
+        saveState();
+        renderDeals();
+        return;
+      }
+      if (target.dataset.deleteDeal) {
+        state.deletedDealIds = state.deletedDealIds || [];
+        state.deletedDealIds.push(target.dataset.deleteDeal);
+        state.deals = state.deals.filter(deal => deal.id !== target.dataset.deleteDeal);
+        saveState();
+        renderDeals();
+        return;
+      }
+      if (target.dataset.delete !== undefined) {
+        const deal = currentDeal();
+        if (!deal) return;
+        deal.rows.splice(Number(target.dataset.delete), 1);
+        touchDeal(deal);
+        renderCalculator();
+      }
+    });
+
+    byId('dealsArchiveBtn').addEventListener('click', () => { dealsArchiveMode = !dealsArchiveMode; renderDeals(); });
+    ['partyTransportApplies', 'partyTransportAmount', 'partyTransportSeparate'].forEach(id => byId(id).addEventListener('change', () => {
+      const deal = currentDeal();
+      if (!deal) return;
+      deal.offerTransport = deal.offerTransport || { applies: false, amount: 0, separate: false };
+      if (id === 'partyTransportApplies') {
+        deal.offerTransport.applies = byId(id).checked;
+        if (!deal.offerTransport.applies) deal.offerTransport.separate = false;
+      } else if (id === 'partyTransportAmount') {
+        deal.offerTransport.amount = Math.max(0, num(byId(id).value));
+      } else {
+        deal.offerTransport.separate = byId(id).checked;
+        if (deal.offerTransport.separate) deal.offerTransport.applies = true;
+      }
+      touchDeal(deal);
+      renderCalculator();
+    }));
+    byId('bulkApplyBtn').addEventListener('click', () => {
+      const deal = currentDeal();
+      if (!deal) return;
+      const markup = Math.max(0, num(byId('bulkMarkup').value));
+      const discount = Math.max(0, num(byId('bulkDiscount').value));
+      if (discount > 0 && discount >= markup) { alert('Discountul trebuie sa fie mai mic decat adaosul. Valorile nu au fost aplicate.'); return; }
+      deal.rows.forEach(row => { row.markup = markup; row.discount = discount; });
+      touchDeal(deal);
+      renderCalculator();
+    });
+    byId('saveSourceOfferBtn').addEventListener('click', () => {
+      const deal = currentDeal(), offerId = linkedOfferId, offersApp = window.calculatorOfertaOffers;
+      if (!deal || !offerId || !offersApp || !offersApp.syncFromDeal) return;
+      if (!offersApp.syncFromDeal(deal, offerId)) { alert('Oferta nu mai exista.'); return; }
+      linkedOfferId = null;
+      selectedDealId = null;
+      offersApp.openOffer(offerId, false);
+    });
+    ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', () => { const deal = currentDeal(); if (deal) touchDeal(deal); renderCalculator(); }));
+    byId('newDealBtn').addEventListener('click', createDeal);
+    byId('backBtn').addEventListener('click', () => {
+      if (linkedOfferId && window.calculatorOfertaOffers && window.calculatorOfertaOffers.openOffer) { const offerId = linkedOfferId; linkedOfferId = null; selectedDealId = null; window.calculatorOfertaOffers.openOffer(offerId, false); return; }
+      selectedDealId = null;
+      dealsArchiveMode = false;
+      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.back) { window.calculatorOfertaOffers.back(); return; }
+      renderDeals();
+    });
+    byId('addBottomBtn').addEventListener('click', () => byId('addBtn').click());
+    byId('addBtn').addEventListener('click', () => {
+      const deal = currentDeal();
+      if (!deal) return;
+      const next = Math.max(0, ...deal.rows.map(r => num(r.offerId))) + 1;
+      deal.rows.push({ offerId: next, sku: '', images: [], product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 });
+      touchDeal(deal);
+      renderCalculator();
+    });
+    byId('resetBtn').addEventListener('click', () => {
+      const deal = currentDeal();
+      if (!deal) return;
+      deal.rows = cloneRows();
+      touchDeal(deal);
+      renderCalculator();
+    });
+    byId('exportBtn').addEventListener('click', () => {
+      const deal = currentDeal();
+      if (!deal) return;
+      const calc = calculate(deal);
+      const header = ['Oferta','SKU','Produs','Bucati','Pret furnizor/buc','Moneda pret','Pret produs in lei','Transport total','Moneda transport','Transport in lei','Cost final/buc','Total cost','Adaos %','Discount %','Pret client/buc','Total client'];
+      const info = [['Partida', deal.dealName || ''], ['Client', deal.clientName || ''], ['Adresa livrare', deal.deliveryAddress || ''], []];
+      const lines = [...info, header, ...calc.map(item => [item.row.offerId, item.row.sku || '', item.row.product, item.row.quantity, item.row.supplierPrice, item.row.productCurrency, item.productLei.toFixed(2), item.row.transport, item.row.transportCurrency, item.transportLei.toFixed(2), item.unitCost.toFixed(2), item.totalCost.toFixed(2), item.row.markup, item.row.discount || 0, item.clientUnit.toFixed(2), item.clientTotal.toFixed(2)])];
+      const csv = lines.map(line => line.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(deal.dealName || 'oferta').replace(/[^a-z0-9_-]+/gi, '_')}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    window.calculatorOfertaApi = {
+      getState: () => state,
+      save: saveState,
+      getCurrentDeal: currentDeal,
+      getDeal,
+      isDealActive,
+      archiveDeal,
+      openDealForOffer,
+      calculate,
+      money,
+      num,
+      renderDeals,
+      renderCalculator,
+      getFirebase: () => ({ ready: firebaseReady, db: firebaseDb, fns: firebaseFns })
+    };
+    window.dispatchEvent(new Event('calculatorOfertaReady'));
+
+    window.addEventListener('beforeunload', () => saveState(true));
+    renderDeals();
+    initFirebaseSync();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
