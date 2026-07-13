@@ -47,3 +47,6 @@ Aplicatia include acum oferte salvate permanent in aceeasi stocare Firebase folo
 - Ofertele apar in sectiunea `Oferte salvate`.
 - Poti vizualiza, edita, duplica, exporta PDF sau sterge o oferta.
 - Pentru update pe GitHub, incarca si fisierele noi: `offers.js`, `offers.css` si folderul `assets/`.
+
+- Transportul comercial si totalurile finale se seteaza in partida; oferta le preia automat.
+- SKU-ul se completeaza in partida si apare in oferta, PDF si exportul CSV.
