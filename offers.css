@@ -1,11 +1,13 @@
 
-.offers-panel { margin-top: 14px; }
+.offers-panel { margin-top: 24px; border-top: 4px solid var(--accent); }
+.offers-panel .deals-head { padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .offers-panel[hidden], .offer-editor-view[hidden] { display: none !important; }
 .offers-list { display: grid; gap: 10px; }
 .offer-card { padding: 14px; display: grid; gap: 10px; }
 .offer-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .offer-card h3 { margin: 0; font-size: 17px; }
 .offer-card p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.offer-card p::before { content: "Partida sursa: "; color: var(--muted); font-weight: 700; }
 .offer-card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .offer-card-grid span { color: var(--muted); font-size: 12px; }
 .offer-card-grid strong { display: block; margin-top: 3px; color: var(--ink); font-size: 14px; overflow-wrap: anywhere; }

@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-180.png" />
-  <link rel="stylesheet" href="offers.css?v=20260713-32" />
+  <link rel="stylesheet" href="offers.css?v=20260713-34" />
   <style>
     :root {
       color-scheme: light;
@@ -84,14 +84,14 @@
     }
     .deals-panel { padding: 14px; display: grid; gap: 12px; }
     .deals-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .deals-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+    .deals-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
     .deals-list.archive-deals-list { grid-template-columns: 1fr; }
-    .deals-list.archive-deals-list .deal-card { grid-template-columns: 1fr auto; align-items: end; }
+    .deals-list.archive-deals-list .deal-card { grid-template-columns: minmax(180px, .75fr) minmax(0, 2.25fr) auto; align-items: center; }
     .deals-list.archive-deals-list .deal-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .deals-list.archive-deals-list .deal-actions { align-self: end; }
-    .deal-card { padding: 14px; display: grid; gap: 10px; }
+    .deals-list.archive-deals-list .deal-actions { align-self: center; }
+    .deal-card { padding: 14px; display: grid; grid-template-columns: minmax(180px, .75fr) minmax(0, 2.25fr) auto; align-items: center; gap: 16px; }
     .deal-card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
-    .deal-meta { display: grid; gap: 5px; color: var(--muted); font-size: 13px; }
+    .deal-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; color: var(--muted); font-size: 13px; }
     .deal-meta strong { color: var(--ink); }
     .deal-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .archived-head { grid-column: 1 / -1; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line); }
@@ -224,6 +224,9 @@
       .party-offer-summary strong:last-child { font-size: 20px; }
       .deals-head { align-items: stretch; flex-direction: column; }
       .deals-list { grid-template-columns: 1fr; }
+      .deal-card, .deals-list.archive-deals-list .deal-card { grid-template-columns: 1fr; gap: 10px; }
+      .deal-meta, .deals-list.archive-deals-list .deal-meta { grid-template-columns: 1fr; gap: 5px; }
+      .deal-actions, .deals-list.archive-deals-list .deal-actions { justify-content: flex-start; }
       .rates { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
       .bulk-pricing { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
       .bulk-pricing .toolbar-head, .bulk-pricing button { grid-column: 1 / -1; }
