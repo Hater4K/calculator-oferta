@@ -1,1 +1,1 @@
-Actualizare vizuala`n`n- Toolbar compact pentru Adaos si Discount aplicat tuturor produselor.`n- Buton discret cu sageata pentru Inapoi la oferte.`n`nIncarca index.html peste cel existent in repository, apoi asteapta 1-2 minute si foloseste Ctrl+F5.
+Actualizare navigare oferta`n`nButonul Inapoi la oferte este acum in zona actiunilor ofertei, inainte de Salveaza oferta, Editeaza partida sursa si Export PDF.`n`nIncarca index.html si offers.js peste fisierele existente din repository. Apoi asteapta 1-2 minute si foloseste Ctrl+F5.
