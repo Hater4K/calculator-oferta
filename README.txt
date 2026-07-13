@@ -1,1 +1,1 @@
-Actualizare navigare oferta`n`nButonul Inapoi la oferte este acum in zona actiunilor ofertei, inainte de Salveaza oferta, Editeaza partida sursa si Export PDF.`n`nIncarca index.html si offers.js peste fisierele existente din repository. Apoi asteapta 1-2 minute si foloseste Ctrl+F5.
+Actualizare pozitie inapoi la oferte`n`nButonul este acum in stanga, deasupra numarului OF-..., separat de actiunile Salveaza oferta, Editeaza partida sursa si Export PDF.`n`nIncarca toate cele trei fisiere peste cele existente: index.html, offers.js si offers.css. Apoi foloseste Ctrl+F5.
