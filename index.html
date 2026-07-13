@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-180.png" />
-  <link rel="stylesheet" href="offers.css?v=20260713-35" />
+  <link rel="stylesheet" href="offers.css?v=20260713-36" />
   <style>
     :root {
       color-scheme: light;
@@ -185,7 +185,9 @@
     td button { min-height: 30px; padding: 5px 6px; font-size: 11px; }
     .deal-sku-image { display: grid; gap: 4px; min-width: 0; }
     .deal-image-picker { display: grid; gap: 4px; min-width: 0; }
+    .deal-image-actions { display: grid; grid-template-columns: minmax(0, 1fr) 28px; gap: 4px; }
     .deal-image-picker button { width: 100%; min-height: 28px; padding: 4px 5px; font-size: 10px; line-height: 1.1; }
+    .deal-image-picker .remove-deal-image { padding: 0; color: #dc2626; border-color: #f3b6b6; background: #fff; font-size: 18px; font-weight: 800; line-height: 1; }
     .deal-product-thumb { display: block; width: 100%; max-height: 86px; object-fit: contain; border: 1px solid var(--line); border-radius: 5px; background: #fff; }    .col-id { width: 4.2%; }
     .col-sku { width: 8.5%; }
     .col-product { width: 11.5%; }
@@ -725,7 +727,7 @@
     function dealImagePicker(rowIndex) {
       const row = currentRows()[rowIndex] || {};
       const hasImage = !!(row.images && row.images[0]);
-      return `<div class="deal-image-picker"><button type="button" data-pick-deal-image="${rowIndex}">${hasImage ? 'Schimba poza' : 'Alege poza'}</button><img id="dealImagePreview-${rowIndex}" class="deal-product-thumb" alt="" hidden></div>`;
+      return `<div class="deal-image-picker"><div class="deal-image-actions"><button type="button" data-pick-deal-image="${rowIndex}">${hasImage ? 'Schimba poza' : 'Alege poza'}</button>${hasImage ? `<button type="button" class="remove-deal-image" data-remove-deal-image="${rowIndex}" title="Sterge poza" aria-label="Sterge poza">&times;</button>` : ''}</div><img id="dealImagePreview-${rowIndex}" class="deal-product-thumb" alt="" hidden></div>`;
     }
 
     function dealSkuImageCell(rowIndex) {
@@ -947,6 +949,15 @@
 
     document.body.addEventListener('click', event => {
       const target = event.target;
+      if (target.dataset.removeDealImage !== undefined) {
+        const deal = currentDeal();
+        const rowIndex = Number(target.dataset.removeDealImage);
+        if (!deal || !deal.rows[rowIndex]) return;
+        deal.rows[rowIndex].images = [];
+        touchDeal(deal);
+        renderCalculator();
+        return;
+      }
       if (target.dataset.pickDealImage !== undefined) {
         const deal = currentDeal();
         const rowIndex = Number(target.dataset.pickDealImage);
