@@ -3,15 +3,15 @@
 .offers-panel .deals-head { padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .offers-panel[hidden], .offer-editor-view[hidden] { display: none !important; }
 .offers-list { display: grid; gap: 10px; }
-.offer-card { padding: 14px; display: grid; gap: 10px; }
+.offer-card { padding: 18px; display: grid; gap: 13px; }
 .offer-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.offer-card h3 { margin: 0; font-size: 17px; }
-.offer-card p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.offer-card h3 { margin: 0; font-size: 20px; }
+.offer-card p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
 .offer-card p::before { content: "Partida sursa: "; color: var(--muted); font-weight: 700; }
-.offer-card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.offer-card-grid span { color: var(--muted); font-size: 12px; }
-.offer-card-grid strong { display: block; margin-top: 3px; color: var(--ink); font-size: 14px; overflow-wrap: anywhere; }
-.status-chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.offer-card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.offer-card-grid span { color: var(--muted); font-size: 14px; }
+.offer-card-grid strong { display: block; margin-top: 5px; color: var(--ink); font-size: 17px; overflow-wrap: anywhere; }
+.status-chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 800; white-space: nowrap; }
 .status-Ciorna { color: #6b4c00; background: #fff4cf; }
 .status-Generata { color: #075985; background: #e0f2fe; }
 .status-Trimisa { color: #5b21b6; background: #ede9fe; }

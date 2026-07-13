@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-180.png" />
-  <link rel="stylesheet" href="offers.css?v=20260713-34" />
+  <link rel="stylesheet" href="offers.css?v=20260713-35" />
   <style>
     :root {
       color-scheme: light;
@@ -89,11 +89,13 @@
     .deals-list.archive-deals-list .deal-card { grid-template-columns: minmax(180px, .75fr) minmax(0, 2.25fr) auto; align-items: center; }
     .deals-list.archive-deals-list .deal-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .deals-list.archive-deals-list .deal-actions { align-self: center; }
-    .deal-card { padding: 14px; display: grid; grid-template-columns: minmax(180px, .75fr) minmax(0, 2.25fr) auto; align-items: center; gap: 16px; }
-    .deal-card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
-    .deal-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; color: var(--muted); font-size: 13px; }
-    .deal-meta strong { color: var(--ink); }
+    .deals-head h2 { font-size: 19px; }
+    .deal-card { padding: 18px; display: grid; grid-template-columns: minmax(180px, .75fr) minmax(0, 2.25fr) auto; align-items: center; gap: 20px; }
+    .deal-card h3 { margin: 0; font-size: 20px; overflow-wrap: anywhere; }
+    .deal-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; color: var(--muted); font-size: 14px; }
+    .deal-meta strong { display: block; margin-top: 4px; color: var(--ink); font-size: 16px; }
     .deal-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .deal-actions button { min-height: 40px; padding: 8px 13px; font-size: 14px; }
     .archived-head { grid-column: 1 / -1; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line); }
     .empty-state { padding: 18px; color: var(--muted); text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
     .toolbar { padding: 14px; display: grid; gap: 10px; }
