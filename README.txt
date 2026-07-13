@@ -1,1 +1,1 @@
-Reparatie afisare partida noua`n`nAm eliminat zona fixa cu spatiu gol. O partida noua afiseaza acum doar continutul real, iar scroll-ul ramane scroll-ul normal al paginii inclusiv pentru Editare partida sursa.`n`nIncarca index.html, offers.js si offers.css peste fisierele existente, apoi foloseste Ctrl+F5.
+Buton adauga rand`n`nButonul Adauga rand din header este ascuns. Ramane numai butonul lat de sub tabelul produselor.`n`nIncarca index.html, offers.js si offers.css peste fisierele existente, apoi foloseste Ctrl+F5.
