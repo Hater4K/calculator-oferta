@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-180.png" />
-  <link rel="stylesheet" href="offers.css?v=20260713-29" />
+  <link rel="stylesheet" href="offers.css?v=20260713-32" />
   <style>
     :root {
       color-scheme: light;
@@ -73,6 +73,10 @@
     .deals-panel { padding: 14px; display: grid; gap: 12px; }
     .deals-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .deals-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+    .deals-list.archive-deals-list { grid-template-columns: 1fr; }
+    .deals-list.archive-deals-list .deal-card { grid-template-columns: 1fr auto; align-items: end; }
+    .deals-list.archive-deals-list .deal-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .deals-list.archive-deals-list .deal-actions { align-self: end; }
     .deal-card { padding: 14px; display: grid; gap: 10px; }
     .deal-card h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
     .deal-meta { display: grid; gap: 5px; color: var(--muted); font-size: 13px; }
@@ -312,7 +316,7 @@
   <script src="firebase-config.js?v=20260711-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="offers.js?v=20260713-31"></script>
+  <script src="offers.js?v=20260713-32"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
@@ -677,7 +681,7 @@
       byId('dealsView').hidden = false;
       byId('calculatorView').hidden = true;
       byId('backBtn').hidden = true;
-      byId('newDealBtn').hidden = false;
+      byId('newDealBtn').hidden = dealsArchiveMode;
       byId('dealsArchiveBtn').hidden = false;
       byId('addBtn').hidden = true;
       byId('exportBtn').hidden = true;
@@ -689,10 +693,16 @@
       const shownDeals = dealsArchiveMode ? archivedDeals : activeDeals;
       byId('dealsTitle').textContent = dealsArchiveMode ? 'Partide arhivate' : 'Partide oferta';
       byId('dealsArchiveBtn').textContent = dealsArchiveMode ? 'Inapoi la partide' : 'Arhiva partide';
+      byId('dealsList').classList.toggle('archive-deals-list', dealsArchiveMode);
       byId('dealsList').innerHTML = shownDeals.length
         ? shownDeals.map(deal => dealCard(deal, dealsArchiveMode)).join('')
         : '<div class="empty-state">'+(dealsArchiveMode ? 'Nu exista partide arhivate.' : 'Nu exista partide active.')+'</div>';
-      if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.renderList) window.calculatorOfertaOffers.renderList();
+      if (dealsArchiveMode) {
+        if (byId('offersView')) byId('offersView').hidden = true;
+        if (byId('offerEditorView')) byId('offerEditorView').hidden = true;
+      } else if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.renderList) {
+        window.calculatorOfertaOffers.renderList();
+      }
     }
 
     function renderDealForm(deal) {
