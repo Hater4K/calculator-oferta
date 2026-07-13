@@ -1,3 +1,10 @@
+## Flux partide si oferte
+
+- Partida este sursa datelor: produse, cantitati, preturi, transport, client si adresa.
+- In oferta se pot modifica doar datele comerciale: numar, data, client, CUI, adresa, valabilitate, plata si observatii.
+- Produsele, preturile si transportul nu se modifica in oferta. Din oferta, apasa **Modifica partida**; orice modificare facuta acolo se transfera automat in oferta.
+- La generarea ofertei, partida se muta din lista activa, dar ramane legata de oferta si poate fi redeschisa din butonul de mai sus.
+
 # Calculator Oferta - GitHub Pages
 
 Folder pregatit pentru publicare pe GitHub Pages.

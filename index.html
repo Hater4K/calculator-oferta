@@ -59,6 +59,18 @@
       font-size: 12px;
     }
     #backBtn::before { content: "\2190"; margin-right: 5px; font-size: 15px; line-height: 0; }
+    body.archive-navigation .brand-nav h1 { display: none; }
+    body.archive-navigation #backBtn {
+      min-height: 38px;
+      padding: 8px 14px;
+      border-color: #ffffff;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 1px 2px rgba(15,23,42,.2);
+    }
+    body.archive-navigation #backBtn::before { font-size: 17px; }
     .sync-status { border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 800; color: #d1fae5; background: rgba(15, 118, 110, .35); }
     .sync-status.warn { color: #fef3c7; background: rgba(146, 64, 14, .35); }
     .sync-status.error { color: #fee2e2; background: rgba(185, 28, 28, .35); }
@@ -235,7 +247,7 @@
       <div class="actions">
         <button class="primary" id="newDealBtn">Adauga partida</button>
         <button id="dealsArchiveBtn">Arhiva partide</button>
-        <button class="primary" id="saveSourceOfferBtn" hidden>Salveaza si actualizeaza oferta</button>
+        <button id="saveSourceOfferBtn" hidden>Inapoi la oferta</button>
         <button class="primary" id="addBtn" hidden>Adauga rand</button>
         <button id="exportBtn" hidden>Export CSV</button>
         <button class="danger" id="resetBtn" hidden>Reset</button>
@@ -316,7 +328,7 @@
   <script src="firebase-config.js?v=20260711-2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="offers.js?v=20260713-35"></script>
+  <script src="offers.js?v=20260713-39"></script>
   <script type="module">
     const currencies = ['PLN', 'RON', 'EUR'];
     const initialRows = [{ offerId: 1, product: '', quantity: 5, supplierPrice: 10, productCurrency: 'EUR', transport: 0, transportCurrency: 'EUR', markup: 5, discount: 0 }];
@@ -370,8 +382,15 @@
       return Number.isFinite(stamp) ? stamp : 0;
     }
 
+    function syncLinkedOffer(deal) {
+      const offersApp = window.calculatorOfertaOffers;
+      if (deal && linkedOfferId && offersApp && offersApp.syncFromDeal) offersApp.syncFromDeal(deal, linkedOfferId);
+    }
+
     function touchDeal(deal) {
-      if (deal) deal.updatedAt = new Date().toISOString();
+      if (!deal) return;
+      deal.updatedAt = new Date().toISOString();
+      syncLinkedOffer(deal);
     }
 
     function dealSignature(deal) {
@@ -678,6 +697,7 @@
 
     function renderDeals() {
       if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.closeArchive) window.calculatorOfertaOffers.closeArchive();
+      document.body.classList.toggle('archive-navigation', dealsArchiveMode);
       byId('dealsView').hidden = false;
       byId('calculatorView').hidden = true;
       byId('backBtn').hidden = !dealsArchiveMode;
@@ -716,6 +736,7 @@
     function renderCalculator() {
       const deal = currentDeal();
       if (!deal) { renderDeals(); return; }
+      document.body.classList.remove('archive-navigation');
       byId('dealsView').hidden = true;
       byId('calculatorView').hidden = false;
       document.documentElement.style.overflowY = 'auto';
@@ -730,7 +751,7 @@
       renderDealForm(deal);
       const linkedOffer = linkedOfferId && state.offers.find(offer => offer.id === linkedOfferId);
       byId('sourceEditNotice').hidden = !linkedOffer;
-      byId('sourceEditNotice').textContent = linkedOffer ? 'Modifici partida sursa pentru oferta ' + linkedOffer.number + '. Salveaza pentru a actualiza oferta curenta.' : '';
+      byId('sourceEditNotice').textContent = linkedOffer ? 'Modifici partida sursa pentru oferta ' + linkedOffer.number + '. Modificarile se transfera automat in oferta.' : '';
       byId('saveSourceOfferBtn').hidden = !linkedOffer;
       const bulkMarkup = byId('bulkMarkup'), bulkDiscount = byId('bulkDiscount');
       if (document.activeElement !== bulkMarkup) bulkMarkup.value = deal.rows.length ? num(deal.rows[0].markup) : '';
@@ -884,15 +905,14 @@
       const deal = currentDeal(), offerId = linkedOfferId, offersApp = window.calculatorOfertaOffers;
       if (!deal || !offerId || !offersApp || !offersApp.syncFromDeal) return;
       if (!offersApp.syncFromDeal(deal, offerId)) { alert('Oferta nu mai exista.'); return; }
-      archiveDeal(deal.id);
       linkedOfferId = null;
       selectedDealId = null;
-      offersApp.openOffer(offerId, true);
+      offersApp.openOffer(offerId, false);
     });
-    ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', renderCalculator));
+    ['ratePLN', 'rateRON', 'rateEUR'].forEach(id => byId(id).addEventListener('input', () => { const deal = currentDeal(); if (deal) touchDeal(deal); renderCalculator(); }));
     byId('newDealBtn').addEventListener('click', createDeal);
     byId('backBtn').addEventListener('click', () => {
-      if (linkedOfferId && window.calculatorOfertaOffers && window.calculatorOfertaOffers.openOffer) { const offerId = linkedOfferId; linkedOfferId = null; selectedDealId = null; window.calculatorOfertaOffers.openOffer(offerId, true); return; }
+      if (linkedOfferId && window.calculatorOfertaOffers && window.calculatorOfertaOffers.openOffer) { const offerId = linkedOfferId; linkedOfferId = null; selectedDealId = null; window.calculatorOfertaOffers.openOffer(offerId, false); return; }
       selectedDealId = null;
       dealsArchiveMode = false;
       if (window.calculatorOfertaOffers && window.calculatorOfertaOffers.back) { window.calculatorOfertaOffers.back(); return; }
