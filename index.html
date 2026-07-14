@@ -386,6 +386,8 @@
     let firebaseReady = false;
     let cloudSaveTimer = null;
     let applyingCloudState = false;
+    // Keeps already loaded product images visible while the editable table re-renders.
+    const dealImageSources = new Map();
 
     const byId = id => document.getElementById(id);
     const money = value => `${Number(value || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} lei`;
@@ -726,8 +728,13 @@
 
     function dealImagePicker(rowIndex) {
       const row = currentRows()[rowIndex] || {};
-      const hasImage = !!(row.images && row.images[0]);
-      return `<div class="deal-image-picker"><div class="deal-image-actions"><button type="button" data-pick-deal-image="${rowIndex}">${hasImage ? 'Schimba poza' : 'Alege poza'}</button>${hasImage ? `<button type="button" class="remove-deal-image" data-remove-deal-image="${rowIndex}" title="Sterge poza" aria-label="Sterge poza">&times;</button>` : ''}</div><img id="dealImagePreview-${rowIndex}" class="deal-product-thumb" alt="" hidden></div>`;
+      const image = row.images && row.images[0];
+      const hasImage = !!image;
+      const cachedSource = image ? dealImageSources.get(image) : '';
+      const preview = cachedSource
+        ? `<img id="dealImagePreview-${rowIndex}" class="deal-product-thumb" alt="" src="${esc(cachedSource)}">`
+        : `<img id="dealImagePreview-${rowIndex}" class="deal-product-thumb" alt="" hidden>`;
+      return `<div class="deal-image-picker"><div class="deal-image-actions"><button type="button" data-pick-deal-image="${rowIndex}">${hasImage ? 'Schimba poza' : 'Alege poza'}</button>${hasImage ? `<button type="button" class="remove-deal-image" data-remove-deal-image="${rowIndex}" title="Sterge poza" aria-label="Sterge poza">&times;</button>` : ''}</div>${preview}</div>`;
     }
 
     function dealSkuImageCell(rowIndex) {
@@ -741,9 +748,16 @@
         const image = deal.rows[index].images && deal.rows[index].images[0];
         const target = byId(`dealImagePreview-${index}`);
         if (!image || !target) continue;
+        const cachedSource = dealImageSources.get(image);
+        if (cachedSource) {
+          target.src = cachedSource;
+          target.hidden = false;
+          continue;
+        }
         const source = await offersApp.imageSource(image);
         const current = byId(`dealImagePreview-${index}`);
         if (!source || !current) continue;
+        dealImageSources.set(image, source);
         current.src = source;
         current.hidden = false;
       }
