@@ -438,6 +438,8 @@
       if (!deal) return;
       deal.updatedAt = new Date().toISOString();
       syncLinkedOffer(deal);
+      // Every change made in a deal is persisted locally and queued for Firebase.
+      saveState();
     }
 
     function dealSignature(deal) {
