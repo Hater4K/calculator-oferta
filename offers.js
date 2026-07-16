@@ -42,7 +42,7 @@ async function pdf(o){
   const moneyValue=v=>Number(v||0).toFixed(2).replace('.',',')+' lei';
   const calcScript="function ofertaNr(v){var s=String(v==null?'':v).replace(/\\s/g,'').replace('lei','').replace(',','.');var n=parseFloat(s);return isNaN(n)?0:n;}function ofertaBani(v){return Number(v||0).toFixed(2).replace('.',',')+' lei';}function calcOferta(i,p,v,n){var q=ofertaNr(v);if(q<0)q=0;var t=this.getField('total_'+i);if(t)t.value=ofertaBani(q*p);var sum=0;for(var x=0;x<n;x++){var f=this.getField('total_'+x);if(f)sum+=ofertaNr(f.value);}var g=this.getField('total_general');if(g)g.value=ofertaBani(sum);}";
   try{if(d.addJS)d.addJS(calcScript)}catch{}
-  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField();f.fieldName=name;f.Rect=rect;f.value=value;f.fontSize=7;f.textColor=[11,100,132];f.borderColor=[142,177,194];f.backgroundColor=background||[255,255,255];f.readOnly=!!readonly;if(action&&f.setAction)f.setAction('Validate',action);d.addField(f)}catch{}};
+  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField();f.fieldName=name;f.Rect=rect;f.value=value;f.fontSize=7;f.textColor=[11,100,132];f.borderColor=[142,177,194];f.backgroundColor=background||[255,255,255];f.fillColor=background||[255,255,255];f.borderStyle='solid';f.borderWidth=.25;f.readOnly=!!readonly;if(action&&f.setAction)f.setAction('Validate',action);d.addField(f)}catch{}};
   const drawInfo=()=>{
     d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.roundedRect(14,33,182,45,4,4,'FD');
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
@@ -56,12 +56,12 @@ async function pdf(o){
     const notes=['1. Pentru comenzi in volume mai mari, preturile pot fi renegociate si optimizate in functie de cantitatea totala comandata.','2. Preturi B2B competitive - conditii optimizate in functie de volumul total si frecventa comenzilor.','3. Discounturi personalizate - disponibile pentru comenzi recurente si parteneriate comerciale pe termen lung.','4. Comenzi mixte - posibilitatea selectarii mai multor categorii si produse intr-o singura comanda.','5. Ofertare personalizata - la cerere, pregatim o oferta comerciala adaptata necesarului companiei dumneavoastra.','6. Parteneriate B2B - sustinem colaborarile constante prin conditii comerciale flexibile si preturi optimizate.'];
     let ny=94;d.setFont('helvetica','normal');d.setFontSize(5.9);d.setTextColor('#101828');notes.forEach(v=>{d.text(v,18,ny);ny+=2.9});
   };
-  const drawProductHeader=y=>{d.setFillColor(12,101,133);d.roundedRect(10,y,190,10,2,2,'F');const headers=[['SKU',14],['IMAGINE',27],['DENUMIRE',66],['PCS/BOX',110],['PRET NET',126],['PRET CU\nTVA',144],['CANT.',162],['TOTAL',181]];headers.forEach(([label,x])=>{d.setFont('helvetica','bold');d.setFontSize(6.2);d.setTextColor('#FFFFFF');d.text(label,x,y+6.1,{align:x===144?'center':'left'});});};
+  const drawProductHeader=y=>{d.setFillColor(12,101,133);d.roundedRect(10,y,190,10,2,2,'F');const headers=[['SKU',14],['IMAGINE',27],['DENUMIRE',66],['PCS/BOX',110],['PRET NET',126],['PRET CU\nTVA',144],['CANTITATE',162],['TOTAL NET',181]];headers.forEach(([label,x])=>{d.setFont('helvetica','bold');d.setFontSize(6.2);d.setTextColor('#FFFFFF');d.text(label,x,y+6.1,{align:(x===144||x===162)?'center':'left'});});};
   const drawProduct=(p,y)=>{const h=24;d.setDrawColor(213,225,232);d.setFillColor(p.i%2?alt:'#FFFFFF');d.roundedRect(10,y,190,h,2,2,'FD');d.setFillColor(225,245,251);d.roundedRect(11,y+1.5,10,h-3,1.5,1.5,'F');text(d,plain(p.x.sku||'-'),16,y+13,6.5,true,'center',darkBlue);
     if(p.image){try{const prop=d.getImageProperties(p.image),ratio=prop.width/prop.height,slot={x:29,y:y+4,w:16,h:16};let w=slot.w,hh=w/ratio;if(hh>slot.h){hh=slot.h;w=hh*ratio}d.addImage(p.image,slot.x+(slot.w-w)/2,slot.y+(slot.h-hh)/2,w,hh)}catch{}}
     const name=d.splitTextToSize(plain(p.x.product).toUpperCase(),58);d.setFont('helvetica','normal');d.setFontSize(6.7);d.setTextColor('#101828');d.text(name,76,y+11.5,{align:'center'});
     text(d,Math.max(0,num(p.x.availableQuantity))+' '+plain(p.x.unit),118,y+13,6.6,true,'center');text(d,money(p.x.unitPrice),135,y+13,6.6,true,'center');text(d,money(p.x.unitPrice*1.21),152,y+13,6.6,true,'center',darkBlue);
-    const gross=Number(p.x.unitPrice||0)*1.21,qty=Math.max(0,num(p.x.quantity));addField('cant_'+p.i,String(qty),[163,y+8,12,6.8],false,"calcOferta("+p.i+","+gross+",event.value,"+products.length+");");addField('total_'+p.i,moneyValue(gross*qty),[178,y+8,19,6.8],true,null,[234,247,252]);
+    const netPrice=Number(p.x.unitPrice||0),qty=Math.max(0,num(p.x.quantity));d.setDrawColor(142,177,194);d.setFillColor(255,255,255);d.setLineWidth(.25);d.rect(163,y+8,12,6.8,'FD');d.setFillColor(234,247,252);d.rect(178,y+8,19,6.8,'F');addField('cant_'+p.i,String(qty),[163,y+8,12,6.8],false,"calcOferta("+p.i+","+netPrice+",event.value,"+products.length+");",[255,255,255]);addField('total_'+p.i,moneyValue(netPrice*qty),[178,y+8,19,6.8],true,null,[234,247,252]);
   };
   base(d,a,false,o);drawInfo();let y=127;drawProductHeader(y);y+=12;
   for(const p of products){if(y+24>276){d.addPage();base(d,a,true,o);y=35;drawProductHeader(y);y+=12}drawProduct(p,y);y+=26;}
@@ -72,6 +72,7 @@ async function pdf(o){
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()
 }function boot(){if(window.calculatorOfertaOffers)return;A=window.calculatorOfertaApi;if(!A)return;shell();window.calculatorOfertaOffers={renderList,onCalculator,back,closeArchive,openOffer,syncFromDeal,uploadImage,imageSource};renderList()}
 if(window.calculatorOfertaApi)boot();window.addEventListener('calculatorOfertaReady',boot)})();
+
 
 
 
