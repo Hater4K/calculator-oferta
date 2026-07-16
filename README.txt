@@ -1,10 +1,10 @@
-﻿UPDATE PDF - Cantitate si Total net
+﻿UPDATE PDF - panou superior aliniat dupa model
 
 Incarca peste GitHub doar:
 - index.html
 - offers.js
 
 Schimbari:
-- Cant. devine Cantitate
-- Total devine Total net si se calculeaza net
-- campul PDF de cantitate are fundal alb si contur fin, ca in model
+- font Liberation Sans incorporat pentru apropiere de fontul modelului
+- logo, furnizor si informatii comerciale repozitionate
+- coloana alba din dreapta este delimitata clar; textul comercial ramane strict in caseta sa
