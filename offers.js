@@ -48,13 +48,19 @@ async function pdf(o){
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
     d.setFillColor(255,255,255);d.rect(180.4,35.2,15.2,40.6,'F');
     try{d.addImage(a.logo,'PNG',31.5,43.5,25.5,25.5)}catch{}
-    // Cele trei coloane sunt aliniate pe acelasi centru vertical al panoului.
-    text(d,'FURNIZOR',67,43,5.45,true,'left',blue);text(d,company.name,67,47.35,5.75,true);
-    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,52.25+i*3.12,4.7,true));
-    text(d,'INFORMATII COMERCIALE',127,42,5.1,true,'left',blue);
-    const c=['Preturile afisate sunt exprimate in RON.','Produsele pot fi comandate inclusiv in cantitati','mai mici decat o cutie completa, in functie de','necesarul si specificul fiecarui client.','Cantitatea PCS/BOX reprezinta ambalarea standard a','produsului si are caracter informativ.','Pentru comenzi recurente, volume mai mari sau achizitii','mixte de produse, oferim conditii comerciale personalizate','si posibilitatea renegocierii preturilor.'];
-    c.forEach((v,i)=>text(d,v,127,46+i*2.75,3.85,true));
-    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
+    // Pozitii reproduse dupa panoul raster din modelul 123.pdf.
+    text(d,'FURNIZOR',67,46,5.45,true,'left',blue);text(d,company.name,67,50.35,5.75,true);
+    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,55.25+i*3.12,4.7,true));
+    text(d,'INFORMATII COMERCIALE',127,41,5.1,true,'left',blue);
+    text(d,'Preturile afisate sunt exprimate in RON.',127,45,3.85,true);
+    text(d,'Produsele pot fi comandate inclusiv in cantitati',127,49.5,3.85,true);
+    text(d,'mai mici decat o cutie completa, in functie de',127,52.2,3.85,true);
+    text(d,'necesarul si specificul fiecarui client.',127,54.9,3.85,true);
+    text(d,'Cantitatea PCS/BOX reprezinta ambalarea standard a',127,59.2,3.85,true);
+    text(d,'produsului si are caracter informativ.',127,61.9,3.85,true);
+    text(d,'Pentru comenzi recurente, volume mai mari sau achizitii',127,66.2,3.85,true);
+    text(d,'mixte de produse, oferim conditii comerciale personalizate',127,68.9,3.85,true);
+    text(d,'si posibilitatea renegocierii preturilor.',127,71.6,3.85,true);    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
     const notes=['1. Pentru comenzi in volume mai mari, preturile pot fi renegociate si optimizate in functie de cantitatea totala comandata.','2. Preturi B2B competitive - conditii optimizate in functie de volumul total si frecventa comenzilor.','3. Discounturi personalizate - disponibile pentru comenzi recurente si parteneriate comerciale pe termen lung.','4. Comenzi mixte - posibilitatea selectarii mai multor categorii si produse intr-o singura comanda.','5. Ofertare personalizata - la cerere, pregatim o oferta comerciala adaptata necesarului companiei dumneavoastra.','6. Parteneriate B2B - sustinem colaborarile constante prin conditii comerciale flexibile si preturi optimizate.'];
     let ny=94;d.setFont('helvetica','normal');d.setFontSize(5.9);d.setTextColor('#101828');notes.forEach(v=>{d.text(v,18,ny);ny+=2.9});
   };
@@ -74,6 +80,7 @@ async function pdf(o){
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()
 }function boot(){if(window.calculatorOfertaOffers)return;A=window.calculatorOfertaApi;if(!A)return;shell();window.calculatorOfertaOffers={renderList,onCalculator,back,closeArchive,openOffer,syncFromDeal,uploadImage,imageSource};renderList()}
 if(window.calculatorOfertaApi)boot();window.addEventListener('calculatorOfertaReady',boot)})();
+
 
 
 
