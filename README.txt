@@ -1,7 +1,10 @@
-﻿UPDATE PDF INTERACTIV - structura 1 la 1 dupa Oferta_CONNECT_interactiva_finala.V2.pdf
+﻿UPDATE PDF INTERACTIV - potrivire panou superior
 
 Incarca peste GitHub doar:
 - index.html
 - offers.js
 
-PDF-ul foloseste acum carduri individuale pentru produse, cu SKU, poza, PCS/BOX, pret net, pret cu TVA, camp Cant. editabil si total calculat. Pentru recalculare PDF deschide in Adobe Acrobat Reader.
+Ajustate dupa masuratorile PDF-ului model:
+- cardul superior cu logo si texte bold
+- cardul Observatii: titlu 8,5 pt si cele 6 randuri la 5,9 pt
+- campurile PDF editabile din Cant.

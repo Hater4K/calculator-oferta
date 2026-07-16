@@ -46,15 +46,15 @@ async function pdf(o){
   const drawInfo=()=>{
     d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.roundedRect(14,33,182,45,4,4,'FD');
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
-    try{d.addImage(a.logo,'PNG',32,43,22,22)}catch{}
-    text(d,'FURNIZOR',67,46,5.5,false,'left',blue);text(d,company.name,67,50,6.1,true);
-    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,54+i*3.25,4.75,i>3));
-    text(d,'INFORMATII COMERCIALE',127,42,5.1,false,'left',blue);
+    try{d.addImage(a.logo,'PNG',31.5,43.5,25.5,25.5)}catch{}
+    text(d,'FURNIZOR',67,46,5.5,true,'left',blue);text(d,company.name,67,50.5,5.8,true);
+    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,55.5+i*3.18,4.75,true));
+    text(d,'INFORMATII COMERCIALE',127,42,5.1,true,'left',blue);
     const c=['Preturile afisate sunt exprimate in RON.','Produsele pot fi comandate inclusiv in cantitati','mai mici decat o cutie completa, in functie de','necesarul si specificul fiecarui client.','Cantitatea PCS/BOX reprezinta ambalarea standard a','produsului si are caracter informativ.','Pentru comenzi recurente, volume mai mari sau achizitii','mixte de produse, oferim conditii comerciale personalizate','si posibilitatea renegocierii preturilor.'];
-    c.forEach((v,i)=>text(d,v,127,46+i*2.75,3.85,i===0));
-    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8,true,'left',darkBlue);
+    c.forEach((v,i)=>text(d,v,127,46+i*2.75,3.85,true));
+    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
     const notes=['1. Pentru comenzi in volume mai mari, preturile pot fi renegociate si optimizate in functie de cantitatea totala comandata.','2. Preturi B2B competitive - conditii optimizate in functie de volumul total si frecventa comenzilor.','3. Discounturi personalizate - disponibile pentru comenzi recurente si parteneriate comerciale pe termen lung.','4. Comenzi mixte - posibilitatea selectarii mai multor categorii si produse intr-o singura comanda.','5. Ofertare personalizata - la cerere, pregatim o oferta comerciala adaptata necesarului companiei dumneavoastra.','6. Parteneriate B2B - sustinem colaborarile constante prin conditii comerciale flexibile si preturi optimizate.'];
-    let ny=94;d.setFont('helvetica','normal');d.setFontSize(4.9);d.setTextColor('#101828');notes.forEach(v=>{const ls=d.splitTextToSize(v,171);d.text(ls,18,ny);ny+=ls.length*2.75+0.35});
+    let ny=94;d.setFont('helvetica','normal');d.setFontSize(5.9);d.setTextColor('#101828');notes.forEach(v=>{d.text(v,18,ny);ny+=2.9});
   };
   const drawProductHeader=y=>{d.setFillColor(12,101,133);d.roundedRect(10,y,190,10,2,2,'F');const headers=[['SKU',14],['IMAGINE',27],['DENUMIRE',66],['PCS/BOX',110],['PRET NET',126],['PRET CU\nTVA',144],['CANT.',162],['TOTAL',181]];headers.forEach(([label,x])=>{d.setFont('helvetica','bold');d.setFontSize(6.2);d.setTextColor('#FFFFFF');d.text(label,x,y+6.1,{align:x===144?'center':'left'});});};
   const drawProduct=(p,y)=>{const h=24;d.setDrawColor(213,225,232);d.setFillColor(p.i%2?alt:'#FFFFFF');d.roundedRect(10,y,190,h,2,2,'FD');d.setFillColor(225,245,251);d.roundedRect(11,y+1.5,10,h-3,1.5,1.5,'F');text(d,plain(p.x.sku||'-'),16,y+13,6.5,true,'center',darkBlue);
@@ -72,6 +72,7 @@ async function pdf(o){
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()
 }function boot(){if(window.calculatorOfertaOffers)return;A=window.calculatorOfertaApi;if(!A)return;shell();window.calculatorOfertaOffers={renderList,onCalculator,back,closeArchive,openOffer,syncFromDeal,uploadImage,imageSource};renderList()}
 if(window.calculatorOfertaApi)boot();window.addEventListener('calculatorOfertaReady',boot)})();
+
 
 
 
