@@ -1,8 +1,7 @@
-﻿UPDATE PDF - format apropiat de Oferta CONNECT interactiva
+﻿UPDATE PDF INTERACTIV - structura 1 la 1 dupa Oferta_CONNECT_interactiva_finala.V2.pdf
 
-Incarca peste repository doar fisierele:
+Incarca peste GitHub doar:
 - index.html
 - offers.js
 
-PDF-ul are prima pagina de prezentare si tabelul pe pagina urmatoare.
-Coloana Cant. foloseste campuri PDF editabile. Pentru recalculare completa deschide PDF-ul in Adobe Acrobat Reader (viewer-ele din browser pot bloca JavaScript-ul PDF).
+PDF-ul foloseste acum carduri individuale pentru produse, cu SKU, poza, PCS/BOX, pret net, pret cu TVA, camp Cant. editabil si total calculat. Pentru recalculare PDF deschide in Adobe Acrobat Reader.
