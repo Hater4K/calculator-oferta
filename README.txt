@@ -1,10 +1,7 @@
-﻿UPDATE PDF - panou superior aliniat dupa model
+﻿FIX EXPORT PDF
 
 Incarca peste GitHub doar:
 - index.html
 - offers.js
 
-Schimbari:
-- font Liberation Sans incorporat pentru apropiere de fontul modelului
-- logo, furnizor si informatii comerciale repozitionate
-- coloana alba din dreapta este delimitata clar; textul comercial ramane strict in caseta sa
+Reparat: generarea PDF nu mai depinde de fonturile externe care produceau eroarea in browser.
