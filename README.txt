@@ -1,1 +1,10 @@
-Reparatie Export PDF`n`n- Butonul afiseaza Se genereaza PDF cat timp lucreaza.`n- PDF-ul foloseste numai poza principala a fiecarui produs.`n- Pozele sunt optimizate numai pentru PDF; originalele raman neschimbate in aplicatie.`n- O imagine blocata nu mai opreste exportul.`n`nIncarca index.html, offers.js si offers.css peste fisierele existente, apoi foloseste Ctrl+F5.
+﻿UPDATE OFERTA CATALOG - 16.07.2026
+
+Incarca peste fisierele existente de pe GitHub:
+- index.html
+- offers.js
+
+Export PDF foloseste acum formatul de catalog:
+SKU | Imagine | Denumire | PCS/BOX | Pret net | Pret cu TVA | Cant. | Total
+
+PDF-ul foloseste exclusiv datele salvate ale ofertei, inclusiv imaginile, preturile, transportul si TVA-ul.
