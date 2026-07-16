@@ -1,4 +1,4 @@
-﻿
+
 (()=>{const STATUS=['Ciorna','Generata','Trimisa','Acceptata','Respinsa'];let A,selected=null,edit=false,assets,archiveMode=false;const $=id=>document.getElementById(id);const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');const num=v=>Number(String(v??'').replace(',','.'))||0;const money=v=>Number(v||0).toLocaleString('ro-RO',{minimumFractionDigits:2,maximumFractionDigits:2})+' lei';const today=()=>new Date().toISOString().slice(0,10);const stamp=o=>Date.parse(o.updatedAt||o.createdAt||'')||0;const safe=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')||'fara_client';const plain=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');const date=v=>v?new Date(v+'T12:00:00').toLocaleDateString('ro-RO'):'-';
 function state(){const s=A.getState();s.offers??=[];s.offers.forEach(o=>o.archivedAt??='');s.deletedOfferIds??=[];s.offerSequence??=0;return s}
 function item(x={}){const q=Math.max(0,num(x.quantity)),p=Math.max(0,num(x.unitPrice));return{id:x.id||Date.now()+'-'+Math.random(),sku:x.sku||'',product:x.product||'Produs fara nume',availableQuantity:Math.max(0,num(x.availableQuantity??x.quantity)),quantity:q,unit:x.unit||'buc.',unitPrice:p,lineTotal:x.lineTotal==null?q*p:num(x.lineTotal),images:Array.isArray(x.images)?x.images.slice(0,2).map(String):[],sourceKey:x.sourceKey||'',sourceUnitPrice:x.sourceUnitPrice==null?null:num(x.sourceUnitPrice)}}
@@ -42,7 +42,7 @@ async function pdf(o){
   const moneyValue=v=>Number(v||0).toFixed(2).replace('.',',')+' lei';
   const calcScript="function ofertaNr(v){var s=String(v==null?'':v).replace(/\\s/g,'').replace('lei','').replace(',','.');var n=parseFloat(s);return isNaN(n)?0:n;}function ofertaBani(v){return Number(v||0).toFixed(2).replace('.',',')+' lei';}function calcOferta(i,p,v,n){var q=ofertaNr(v);if(q<0)q=0;var t=this.getField('total_'+i);if(t)t.value=ofertaBani(q*p);var sum=0;for(var x=0;x<n;x++){var f=this.getField('total_'+x);if(f)sum+=ofertaNr(f.value);}var g=this.getField('total_general');if(g)g.value=ofertaBani(sum);}";
   try{if(d.addJS)d.addJS(calcScript)}catch{}
-  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField();f.fieldName=name;f.Rect=rect;f.value=value;f.fontSize=7;f.textColor=[11,100,132];f.borderColor=[142,177,194];f.backgroundColor=background||[255,255,255];f.fillColor=background||[255,255,255];f.borderStyle='solid';f.borderWidth=.25;f.readOnly=!!readonly;if(action&&f.setAction)f.setAction('Validate',action);d.addField(f)}catch{}};
+  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField(),editable=!readonly;f.fieldName=name;f.Rect=rect;f.value=value;f.fontSize=editable?8:7;f.textColor=editable?[23,37,54]:[11,100,132];f.borderColor=editable?[159,184,199]:[142,177,194];f.backgroundColor=background||[255,255,255];f.fillColor=background||[255,255,255];f.borderStyle='solid';f.borderWidth=editable?.7:.25;f.maxLen=editable?8:100;f.readOnly=!!readonly;if(action&&f.setAction)f.setAction('Validate',action);d.addField(f)}catch{}};
   const drawInfo=()=>{
     d.setLineWidth(.28);d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.roundedRect(14,33,182,45,4,4,'FD');
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
@@ -53,14 +53,14 @@ async function pdf(o){
     ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,55.25+i*3.12,4.7,true));
     text(d,'INFORMATII COMERCIALE',127,41,5.1,true,'left',blue);
     text(d,'Preturile afisate sunt exprimate in RON.',127,45,3.85,true);
-    text(d,'Produsele pot fi comandate inclusiv in cantitati',127,49.5,3.85,true);
-    text(d,'mai mici decat o cutie completa, in functie de',127,52.2,3.85,true);
-    text(d,'necesarul si specificul fiecarui client.',127,54.9,3.85,true);
-    text(d,'Cantitatea PCS/BOX reprezinta ambalarea standard a',127,59.2,3.85,true);
-    text(d,'produsului si are caracter informativ.',127,61.9,3.85,true);
-    text(d,'Pentru comenzi recurente, volume mai mari sau achizitii',127,66.2,3.85,true);
-    text(d,'mixte de produse, oferim conditii comerciale personalizate',127,68.9,3.85,true);
-    text(d,'si posibilitatea renegocierii preturilor.',127,71.6,3.85,true);    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
+    text(d,'Produsele pot fi comandate inclusiv in cantitati',127,48.8,3.85,true);
+    text(d,'mai mici decat o cutie completa, in functie de',127,51.25,3.85,true);
+    text(d,'necesarul si specificul fiecarui client.',127,53.7,3.85,true);
+    text(d,'Cantitatea PCS/BOX reprezinta ambalarea standard a',127,57.6,3.85,true);
+    text(d,'produsului si are caracter informativ.',127,60.05,3.85,true);
+    text(d,'Pentru comenzi recurente, volume mai mari sau achizitii',127,63.95,3.85,true);
+    text(d,'mixte de produse, oferim conditii comerciale personalizate',127,66.4,3.85,true);
+    text(d,'si posibilitatea renegocierii preturilor.',127,68.85,3.85,true);    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
     const notes=['1. Pentru comenzi in volume mai mari, preturile pot fi renegociate si optimizate in functie de cantitatea totala comandata.','2. Preturi B2B competitive - conditii optimizate in functie de volumul total si frecventa comenzilor.','3. Discounturi personalizate - disponibile pentru comenzi recurente si parteneriate comerciale pe termen lung.','4. Comenzi mixte - posibilitatea selectarii mai multor categorii si produse intr-o singura comanda.','5. Ofertare personalizata - la cerere, pregatim o oferta comerciala adaptata necesarului companiei dumneavoastra.','6. Parteneriate B2B - sustinem colaborarile constante prin conditii comerciale flexibile si preturi optimizate.'];
     let ny=94;d.setFont('helvetica','normal');d.setFontSize(5.9);d.setTextColor('#101828');notes.forEach(v=>{d.text(v,18,ny);ny+=2.9});
   };
@@ -69,7 +69,7 @@ async function pdf(o){
     if(p.image){try{const prop=d.getImageProperties(p.image),ratio=prop.width/prop.height,slot={x:29,y:y+4,w:16,h:16};let w=slot.w,hh=w/ratio;if(hh>slot.h){hh=slot.h;w=hh*ratio}d.addImage(p.image,slot.x+(slot.w-w)/2,slot.y+(slot.h-hh)/2,w,hh)}catch{}}
     const name=d.splitTextToSize(plain(p.x.product).toUpperCase(),58);d.setFont('helvetica','normal');d.setFontSize(6.7);d.setTextColor('#101828');d.text(name,76,y+11.5,{align:'center'});
     text(d,Math.max(0,num(p.x.availableQuantity))+' '+plain(p.x.unit),118,y+13,6.6,true,'center');text(d,money(p.x.unitPrice),135,y+13,6.6,true,'center');text(d,money(p.x.unitPrice*1.21),152,y+13,6.6,true,'center',darkBlue);
-    const netPrice=Number(p.x.unitPrice||0),qty=Math.max(0,num(p.x.quantity));d.setDrawColor(142,177,194);d.setFillColor(255,255,255);d.setLineWidth(.25);d.rect(163,y+8,12,6.8,'FD');d.setFillColor(234,247,252);d.rect(178,y+8,19,6.8,'F');addField('cant_'+p.i,String(qty),[163,y+8,12,6.8],false,"calcOferta("+p.i+","+netPrice+",event.value,"+products.length+");",[255,255,255]);addField('total_'+p.i,moneyValue(netPrice*qty),[178,y+8,19,6.8],true,null,[234,247,252]);
+    const netPrice=Number(p.x.unitPrice||0),qty=Math.max(0,num(p.x.quantity));d.setDrawColor(159,184,199);d.setFillColor(255,255,255);d.setLineWidth(.7);d.rect(162.4,y+7.1,13.2,8.1,'FD');d.setFillColor(234,247,252);d.rect(178,y+8,19,6.8,'F');addField('cant_'+p.i,String(qty),[162.4,y+7.1,13.2,8.1],false,"calcOferta("+p.i+","+netPrice+",event.value,"+products.length+");",[255,255,255]);addField('total_'+p.i,moneyValue(netPrice*qty),[178,y+8,19,6.8],true,null,[234,247,252]);
   };
   base(d,a,false,o);drawInfo();let y=127;drawProductHeader(y);y+=12;
   for(const p of products){if(y+24>276){d.addPage();base(d,a,true,o);y=35;drawProductHeader(y);y+=12}drawProduct(p,y);y+=26;}
