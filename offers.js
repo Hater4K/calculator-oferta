@@ -48,8 +48,9 @@ async function pdf(o){
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
     d.setFillColor(255,255,255);d.rect(180.4,35.2,15.2,40.6,'F');
     try{d.addImage(a.logo,'PNG',31.5,43.5,25.5,25.5)}catch{}
-    text(d,'FURNIZOR',67,46,5.45,true,'left',blue);text(d,company.name,67,50.35,5.75,true);
-    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,55.25+i*3.12,4.7,true));
+    // Cele trei coloane sunt aliniate pe acelasi centru vertical al panoului.
+    text(d,'FURNIZOR',67,43,5.45,true,'left',blue);text(d,company.name,67,47.35,5.75,true);
+    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,52.25+i*3.12,4.7,true));
     text(d,'INFORMATII COMERCIALE',127,42,5.05,true,'left',blue);
     const c=['Preturile afisate sunt exprimate in RON.','Produsele pot fi comandate inclusiv in cantitati','mai mici decat o cutie completa, in functie de','necesarul si specificul fiecarui client.','Cantitatea PCS/BOX reprezinta ambalarea standard a','produsului si are caracter informativ.','Pentru comenzi recurente, volume mai mari sau achizitii','mixte de produse, oferim conditii comerciale personalizate','si posibilitatea renegocierii preturilor.'];
     c.forEach((v,i)=>text(d,v,127,46+i*2.75,3.8,true));
@@ -73,6 +74,7 @@ async function pdf(o){
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()
 }function boot(){if(window.calculatorOfertaOffers)return;A=window.calculatorOfertaApi;if(!A)return;shell();window.calculatorOfertaOffers={renderList,onCalculator,back,closeArchive,openOffer,syncFromDeal,uploadImage,imageSource};renderList()}
 if(window.calculatorOfertaApi)boot();window.addEventListener('calculatorOfertaReady',boot)})();
+
 
 
 
