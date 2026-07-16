@@ -1,10 +1,8 @@
-﻿UPDATE OFERTA CATALOG - 16.07.2026
+﻿UPDATE PDF - format apropiat de Oferta CONNECT interactiva
 
-Incarca peste fisierele existente de pe GitHub:
+Incarca peste repository doar fisierele:
 - index.html
 - offers.js
 
-Export PDF foloseste acum formatul de catalog:
-SKU | Imagine | Denumire | PCS/BOX | Pret net | Pret cu TVA | Cant. | Total
-
-PDF-ul foloseste exclusiv datele salvate ale ofertei, inclusiv imaginile, preturile, transportul si TVA-ul.
+PDF-ul are prima pagina de prezentare si tabelul pe pagina urmatoare.
+Coloana Cant. foloseste campuri PDF editabile. Pentru recalculare completa deschide PDF-ul in Adobe Acrobat Reader (viewer-ele din browser pot bloca JavaScript-ul PDF).
