@@ -51,9 +51,16 @@ async function pdf(o){
     // Cele trei coloane sunt aliniate pe acelasi centru vertical al panoului.
     text(d,'FURNIZOR',67,43,5.45,true,'left',blue);text(d,company.name,67,47.35,5.75,true);
     ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,52.25+i*3.12,4.7,true));
+    // Blocuri separate, cu acelasi ritm vizual ca in modelul aprobat.
     text(d,'INFORMATII COMERCIALE',127,42,5.05,true,'left',blue);
-    const c=['Preturile afisate sunt exprimate in RON.','Produsele pot fi comandate inclusiv in cantitati','mai mici decat o cutie completa, in functie de','necesarul si specificul fiecarui client.','Cantitatea PCS/BOX reprezinta ambalarea standard a','produsului si are caracter informativ.','Pentru comenzi recurente, volume mai mari sau achizitii','mixte de produse, oferim conditii comerciale personalizate','si posibilitatea renegocierii preturilor.'];
-    c.forEach((v,i)=>text(d,v,127,46+i*2.75,3.8,true));
+    text(d,'Preturile afisate sunt exprimate in RON.',127,47,3.8,true);
+    text(d,'Produsele pot fi comandate inclusiv in cantitati',127,53,3.8,true);
+    text(d,'mai mici decat o cutie completa, in functie de',127,55.7,3.8,true);
+    text(d,'necesarul si specificul fiecarui client.',127,58.4,3.8,true);
+    text(d,'Cantitatea PCS/BOX reprezinta ambalarea standard a',127,64,3.8,true);
+    text(d,'produsului si are caracter informativ.',127,66.7,3.8,true);
+    text(d,'Pentru comenzi recurente, volume mai mari sau achizitii',127,72,3.8,true);
+    text(d,'mixte de produse, oferim conditii comerciale personalizate',127,74.7,3.8,true);
     d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
     const notes=['1. Pentru comenzi in volume mai mari, preturile pot fi renegociate si optimizate in functie de cantitatea totala comandata.','2. Preturi B2B competitive - conditii optimizate in functie de volumul total si frecventa comenzilor.','3. Discounturi personalizate - disponibile pentru comenzi recurente si parteneriate comerciale pe termen lung.','4. Comenzi mixte - posibilitatea selectarii mai multor categorii si produse intr-o singura comanda.','5. Ofertare personalizata - la cerere, pregatim o oferta comerciala adaptata necesarului companiei dumneavoastra.','6. Parteneriate B2B - sustinem colaborarile constante prin conditii comerciale flexibile si preturi optimizate.'];
     let ny=94;d.setFont('helvetica','normal');d.setFontSize(5.9);d.setTextColor('#101828');notes.forEach(v=>{d.text(v,18,ny);ny+=2.9});
@@ -74,6 +81,7 @@ async function pdf(o){
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()
 }function boot(){if(window.calculatorOfertaOffers)return;A=window.calculatorOfertaApi;if(!A)return;shell();window.calculatorOfertaOffers={renderList,onCalculator,back,closeArchive,openOffer,syncFromDeal,uploadImage,imageSource};renderList()}
 if(window.calculatorOfertaApi)boot();window.addEventListener('calculatorOfertaReady',boot)})();
+
 
 
 
