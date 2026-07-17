@@ -46,7 +46,7 @@ async function pdf(o){
     const current="var s=String(value==null?'':value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var q=parseFloat(s);if(isNaN(q)||q<0)q=0;";
     const id=('000'+fieldNo).slice(-3);
     const total="var row=q*"+netPrice+";var target=this.getField('total_"+id+"');if(target)target.value=(function(v){"+moneyAction('v')+"})(row);";
-    const sum="var sum=0;for(var i=1;i<="+count+";i++){var f=this.getField('total_'+('000'+i).slice(-3));if(f){var t=String(f.value==null?'':f.value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var n=parseFloat(t);if(!isNaN(n))sum+=n;}}var general=this.getField('total_general');if(general)general.value=(function(v){"+moneyAction('v')+"})(sum*1.21);";
+    const sum="var sum=0;for(var i=1;i<="+count+";i++){var f=this.getField('total_'+('000'+i).slice(-3));if(f){var t=String(f.value==null?'':f.value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var n=parseFloat(t);if(!isNaN(n))sum+=n;}}var netTotal=this.getField('total_net_general');if(netTotal)netTotal.value=(function(v){"+moneyAction('v')+"})(sum);var vatTotal=this.getField('total_vat_general');if(vatTotal)vatTotal.value=(function(v){"+moneyAction('v')+"})(sum*0.21);var general=this.getField('total_general');if(general)general.value=(function(v){"+moneyAction('v')+"})(sum*1.21);";
     return raw+current+total+sum;
   };
   const formFields=[];
@@ -81,9 +81,8 @@ async function pdf(o){
   };
   base(d,a,false,o);drawInfo();let y=127;drawProductHeader(y);y+=12;
   for(const p of products){if(y+24>276){d.addPage();base(d,a,true,o);y=35;drawProductHeader(y);y+=12}drawProduct(p,y);y+=26;}
-  const net=Number(o.total||0),vat=Number(o.vatAmount||net*.21),gross=Number(o.totalWithVat||net+vat);
   if(y+28>270){d.addPage();base(d,a,true,o);y=40}
-  d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(130,y,66,27,2,2,'FD');text(d,'TOTAL FARA TVA',134,y+7,6,true);text(d,money(net),192,y+7,7,true,'right');text(d,'TVA (21%)',134,y+14,6,true);text(d,money(vat),192,y+14,7,true,'right');text(d,'TOTAL DE PLATA',134,y+23,7.6,true);addField('total_general',money(0),[159.5,y+19.1,32.5,5.2],true,null,[234,247,252]);
+  d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(130,y,66,27,2,2,'FD');text(d,'TOTAL FARA TVA',134,y+7,6,true);addField('total_net_general',money(0),[163,y+3.9,29,5.2],true,null,[234,247,252]);text(d,'TVA (21%)',134,y+14,6,true);addField('total_vat_general',money(0),[163,y+10.9,29,5.2],true,null,[234,247,252]);text(d,'TOTAL DE PLATA',134,y+23,7.6,true);addField('total_general',money(0),[159.5,y+19.1,32.5,5.2],true,null,[234,247,252]);
   const acroRoot=d.internal.acroformPlugin&&d.internal.acroformPlugin.acroFormDictionaryRoot;if(acroRoot&&acroRoot.getKeyValueListForStream){const rootFields=acroRoot.getKeyValueListForStream.bind(acroRoot);acroRoot.getKeyValueListForStream=()=>rootFields().concat([{key:'NeedAppearances',value:'true'}]);}
   const pages=d.getNumberOfPages();for(let page=1;page<=pages;page++){d.setPage(page);footer(d,page,pages)}
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()

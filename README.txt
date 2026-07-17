@@ -1,14 +1,14 @@
-ACTUALIZARE PDF - CALCUL CANTITATE VERIFICAT
+ACTUALIZARE PDF - SUMAR DINAMIC
 
 Ce repara:
-- Campurile Cantitate pornesc cu 0.
-- Total net porneste cu 0,00 lei.
-- Total net se actualizeaza cu formula Cantitate x Pret net.
-- Calculul este inclus direct in fiecare camp PDF, fara dependenta de un script global.
-- PDF-ul include setarea de compatibilitate NeedAppearances, la fel ca modelul care functiona.
+- Total fara TVA se calculeaza din liniile completate din PDF.
+- TVA (21%) se recalculeaza automat din Total fara TVA.
+- Total de plata se recalculeaza automat.
+- Toate cele trei valori pornesc de la 0,00 lei si nu mai preiau sumele vechi din oferta.
 
 Test efectuat:
 - 34 x 3,99 lei = 135,66 lei.
-- Total general cu TVA pentru aceasta linie = 164,15 lei.
+- 1 x 12,13 lei = 12,13 lei.
+- Total fara TVA = 147,79 lei; TVA = 31,04 lei; Total de plata = 178,83 lei.
 
 Incarca toate fisierele din acest folder peste cele existente pe GitHub.
