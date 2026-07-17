@@ -1,8 +1,14 @@
-ACTUALIZARE PDF - Calcul live pentru Cantitate
+ACTUALIZARE PDF - CALCUL CANTITATE VERIFICAT
 
+Ce repara:
 - Campurile Cantitate pornesc cu 0.
 - Total net porneste cu 0,00 lei.
-- Total net se actualizeaza in timp ce este scrisa cantitatea: Cantitate x Pret net.
-- PDF-ul are atat actiunea de tastare, cat si actiunea de validare, dupa modelul PDF de referinta.
+- Total net se actualizeaza cu formula Cantitate x Pret net.
+- Calculul este inclus direct in fiecare camp PDF, fara dependenta de un script global.
+- PDF-ul include setarea de compatibilitate NeedAppearances, la fel ca modelul care functiona.
+
+Test efectuat:
+- 34 x 3,99 lei = 135,66 lei.
+- Total general cu TVA pentru aceasta linie = 164,15 lei.
 
 Incarca toate fisierele din acest folder peste cele existente pe GitHub.
