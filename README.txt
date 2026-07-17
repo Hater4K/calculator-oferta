@@ -1,9 +1,8 @@
-ACTUALIZARE PDF - Cantitate si Total Net
+ACTUALIZARE PDF - Calcul live pentru Cantitate
 
-Ce s-a corectat:
-- Toate casutele Cantitate pornesc cu valoarea 0.
-- Toate valorile Total net pornesc de la 0,00 lei.
-- La modificarea unei cantitati, Total net se calculeaza: Cantitate x Pret net.
-- Totalul general este recalculat automat dupa fiecare rand.
+- Campurile Cantitate pornesc cu 0.
+- Total net porneste cu 0,00 lei.
+- Total net se actualizeaza in timp ce este scrisa cantitatea: Cantitate x Pret net.
+- PDF-ul are atat actiunea de tastare, cat si actiunea de validare, dupa modelul PDF de referinta.
 
-Incarca toate fisierele din acest folder peste cele existente in repository-ul GitHub.
+Incarca toate fisierele din acest folder peste cele existente pe GitHub.
