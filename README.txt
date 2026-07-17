@@ -1,4 +1,4 @@
-UPDATE PDF - RECALCULARE CANTITATE
+UPDATE PDF - CALCUL CA MODELUL INTERACTIV
 
 Inlocuieste fisierele din acest folder peste fisierele existente din repository.
-Cand se modifica o cantitate, Total net al produsului si Total de plata se actualizeaza in timpul scrierii si la confirmarea campului.
+Calculul cantitatilor foloseste acum aceeasi structura ca PDF-ul model: campuri numerotate cant_001 / total_001 si o singura validare la confirmarea cantitatii.
