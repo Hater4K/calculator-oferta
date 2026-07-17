@@ -1,7 +1,4 @@
-﻿FIX EXPORT PDF
+UPDATE PDF - TOTAL FINAL ALINIAT
 
-Incarca peste GitHub doar:
-- index.html
-- offers.js
-
-Reparat: generarea PDF nu mai depinde de fonturile externe care produceau eroarea in browser.
+Inlocuieste fisierele din acest folder peste fisierele existente din repository.
+Rândul TOTAL DE PLATA are acum spatiu suficient si formatare corecta a sumelor cu separator de mii.
