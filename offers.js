@@ -1,4 +1,4 @@
-
+﻿
 (()=>{const STATUS=['Ciorna','Generata','Trimisa','Acceptata','Respinsa'];let A,selected=null,edit=false,assets,archiveMode=false;const $=id=>document.getElementById(id);const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');const num=v=>Number(String(v??'').replace(',','.'))||0;const money=v=>Number(v||0).toLocaleString('ro-RO',{minimumFractionDigits:2,maximumFractionDigits:2})+' lei';const today=()=>new Date().toISOString().slice(0,10);const stamp=o=>Date.parse(o.updatedAt||o.createdAt||'')||0;const safe=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')||'fara_client';const plain=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');const date=v=>v?new Date(v+'T12:00:00').toLocaleDateString('ro-RO'):'-';
 function state(){const s=A.getState();s.offers??=[];s.offers.forEach(o=>o.archivedAt??='');s.deletedOfferIds??=[];s.offerSequence??=0;return s}
 function item(x={}){const q=Math.max(0,num(x.quantity)),p=Math.max(0,num(x.unitPrice));return{id:x.id||Date.now()+'-'+Math.random(),sku:x.sku||'',product:x.product||'Produs fara nume',availableQuantity:Math.max(0,num(x.availableQuantity??x.quantity)),quantity:q,unit:x.unit||'buc.',unitPrice:p,lineTotal:x.lineTotal==null?q*p:num(x.lineTotal),images:Array.isArray(x.images)?x.images.slice(0,2).map(String):[],sourceKey:x.sourceKey||'',sourceUnitPrice:x.sourceUnitPrice==null?null:num(x.sourceUnitPrice)}}
@@ -41,7 +41,7 @@ async function pdf(o){
   const blue='#1F9DCF',darkBlue='#0B6484',line='#D5E1E8',pale='#EAF7FC',alt='#F4F7F8';
   const moneyValue=v=>Number(v||0).toFixed(2).replace('.',',')+' lei';
   const moneyAction=v=>"var c=Math.round(Number(v||0)*100),w=Math.floor(c/100),z=c-(w*100);return String(w)+','+(z<10?'0':'')+String(z)+' lei';";
-  // Fiecare camp contine formula completa: functioneaza si in PDFium/Chrome, fara JavaScript global.
+  // Fiecare camp contine formula completa pentru cititoarele PDF care suporta JavaScript AcroForm (Adobe Acrobat).
   const calculationAction=(fieldNo,netPrice,count,live)=>{
     const raw=live?"var before=String(event.value==null?'':event.value),start=Number(event.selStart||0),end=Number(event.selEnd==null?start:event.selEnd);var value=before.substring(0,start)+String(event.change==null?'':event.change)+before.substring(end);":"var value=event.value;";
     const parse="var s=String(value==null?'':value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var q=parseFloat(s);if(isNaN(q)||q<0)q=0;";
@@ -50,9 +50,7 @@ async function pdf(o){
     const sum="var sum=0;for(var i=1;i<="+count+";i++){if(i==="+fieldNo+"){sum+=row;continue;}var f=this.getField('total_'+('000'+i).slice(-3));if(f){var t=String(f.value==null?'':f.value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var n=parseFloat(t);if(!isNaN(n))sum+=n;}}var netField=this.getField('total_net_general');if(netField)netField.value=(function(v){"+moneyAction('v')+"})(sum);var vatField=this.getField('total_vat_general');if(vatField)vatField.value=(function(v){"+moneyAction('v')+"})(sum*0.21);var general=this.getField('total_general');if(general)general.value=(function(v){"+moneyAction('v')+"})(sum*1.21);";
     return raw+parse+row+sum;
   };
-  const formFields=[];
-  try{if(d.addJS)d.addJS(documentCalculationScript);}catch{}
-  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField(),editable=!readonly,grand=name==='total_general';f.fieldName=name;f.Rect=rect;f.value=value;f.defaultValue=value;f.fontName='helvetica';f.fontStyle=(editable||grand)?'bold':'normal';f.fontSize=grand?7.6:(editable?8:7);f.maxFontSize=grand?7.6:(editable?8:7);f.color=editable?'#172536':'#0B6484';f.textAlign=grand?'right':'left';f.maxLen=editable?8:100;f.readOnly=!!readonly;if(action){const escPdf=v=>String(v).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');const live=escPdf(action.live),validate=escPdf(action.validate);Object.defineProperty(f,'AA',{value:'<< /K << /S /JavaScript /JS ('+live+') >> /V << /S /JavaScript /JS ('+validate+') >> >>',enumerable:true,configurable:false});}d.addField(f);formFields.push(f)}catch{}};  const drawInfo=()=>{
+  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField(),editable=!readonly,grand=name==='total_general';f.fieldName=name;f.Rect=rect;f.value=value;f.defaultValue=value;f.fontName='helvetica';f.fontStyle='normal';f.fontSize=grand?7.6:(editable?8:7);f.maxFontSize=grand?7.6:(editable?8:7);f.color=editable?'#172536':'#0B6484';f.textAlign=grand?'right':'left';f.maxLen=editable?8:100;f.readOnly=!!readonly;f.borderStyle='solid';f.borderWidth=editable?.35:0;f.borderColor=editable?'#9FB8C7':(background?'#EAF7FC':'#FFFFFF');f.fillColor=editable?'#FFFFFF':(background||'#FFFFFF');if(action&&f.setAction){f.setAction('Keystroke',action.live);f.setAction('Validate',action.validate);f.setAction('Calculate',action.validate)}d.addField(f)}catch(error){console.warn('Camp PDF indisponibil:',name,error)}};  const drawInfo=()=>{
     d.setLineWidth(.28);d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.roundedRect(14,33,182,45,4,4,'FD');
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
     d.setFillColor(255,255,255);d.rect(180.4,35.2,15.2,40.6,'F');
@@ -84,11 +82,11 @@ async function pdf(o){
   for(const p of products){if(y+24>276){d.addPage();base(d,a,true,o);y=35;drawProductHeader(y);y+=12}drawProduct(p,y);y+=26;}
   if(y+28>270){d.addPage();base(d,a,true,o);y=40}
   d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(130,y,66,27,2,2,'FD');text(d,'TOTAL FARA TVA',134,y+7,6,true);addField('total_net_general',money(0),[163,y+3.9,29,5.2],true,null,[234,247,252]);text(d,'TVA (21%)',134,y+14,6,true);addField('total_vat_general',money(0),[163,y+10.9,29,5.2],true,null,[234,247,252]);text(d,'TOTAL DE PLATA',134,y+23,7.6,true);addField('total_general',money(0),[159.5,y+19.1,32.5,5.2],true,null,[234,247,252]);
-  const acroRoot=d.internal.acroformPlugin&&d.internal.acroformPlugin.acroFormDictionaryRoot;if(acroRoot&&acroRoot.getKeyValueListForStream){const rootFields=acroRoot.getKeyValueListForStream.bind(acroRoot);acroRoot.getKeyValueListForStream=()=>rootFields().concat([{key:'NeedAppearances',value:'true'}]);}
   const pages=d.getNumberOfPages();for(let page=1;page<=pages;page++){d.setPage(page);footer(d,page,pages)}
   d.save('Oferta_'+safe(o.number)+'_'+safe(o.clientName)+'_'+o.date+'.pdf');renderList()
 }function boot(){if(window.calculatorOfertaOffers)return;A=window.calculatorOfertaApi;if(!A)return;shell();window.calculatorOfertaOffers={renderList,onCalculator,back,closeArchive,openOffer,syncFromDeal,uploadImage,imageSource};renderList()}
 if(window.calculatorOfertaApi)boot();window.addEventListener('calculatorOfertaReady',boot)})();
+
 
 
 

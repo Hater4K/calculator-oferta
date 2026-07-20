@@ -1,7 +1,5 @@
-UPDATE PDF - DESIGN CANTITATE
+﻿UPDATE PDF FORMULAR STABIL
 
-Inlocuieste index.html si offers.js din repository.
-Pastreaza firebase-config.js existent.
-Campurile Cantitate si Total net au un design compact si discret, fara schimbarea calculelor.
-UPDATE 2026-07-20: Calculul campurilor Cantitate foloseste JavaScript AcroForm standard pentru Adobe Acrobat/Reader. PDF viewers care nu executa JavaScript (de exemplu Preview pe macOS sau browserul) nu pot recalcula campuri interactive.
+Contine reparatia pentru campurile interactive: font/aparenta stabila si actiuni standard AcroForm pentru cantitate si totaluri.
 
+Inlocuieste fisierele vechi din repository cu toate fisierele din acest folder.
