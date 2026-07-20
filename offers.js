@@ -41,43 +41,66 @@ async function pdf(o){
   const blue='#1F9DCF',darkBlue='#0B6484',line='#D5E1E8',pale='#EAF7FC',alt='#F4F7F8';
   const moneyValue=v=>Number(v||0).toFixed(2).replace('.',',')+' lei';
   const moneyAction=v=>"var c=Math.round(Number(v||0)*100),w=Math.floor(c/100),z=c-(w*100);return String(w)+','+(z<10?'0':'')+String(z)+' lei';";
-  const calculationAction=(fieldNo,netPrice,count,live)=>{
-    const raw=live?"var before=String(event.value==null?'':event.value),start=Number(event.selStart||0),end=Number(event.selEnd==null?start:event.selEnd);var value=before.substring(0,start)+String(event.change==null?'':event.change)+before.substring(end);":"var value=event.value;";
-    const current="var s=String(value==null?'':value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var q=parseFloat(s);if(isNaN(q)||q<0)q=0;";
-    const id=('000'+fieldNo).slice(-3);
-    const total="var row=q*"+netPrice+";var target=this.getField('total_"+id+"');if(target)target.value=(function(v){"+moneyAction('v')+"})(row);";
-    const sum="var sum=0;for(var i=1;i<="+count+";i++){var f=this.getField('total_'+('000'+i).slice(-3));if(f){var t=String(f.value==null?'':f.value).split(' ').join('').split('lei').join('').split('.').join('').replace(',','.');var n=parseFloat(t);if(!isNaN(n))sum+=n;}}var netTotal=this.getField('total_net_general');if(netTotal)netTotal.value=(function(v){"+moneyAction('v')+"})(sum);var vatTotal=this.getField('total_vat_general');if(vatTotal)vatTotal.value=(function(v){"+moneyAction('v')+"})(sum*0.21);var general=this.getField('total_general');if(general)general.value=(function(v){"+moneyAction('v')+"})(sum*1.21);";
-    return raw+current+total+sum;
-  };
+  // Calcul standard AcroForm: este apelat la validarea fiecarui camp Cantitate.
+  // Este compatibil cu Adobe Acrobat / Reader; alte vizualizatoare pot dezactiva JavaScript-ul PDF.
+  const calculationAction=(fieldNo,netPrice)=>'calcOferta('+fieldNo+','+Number(netPrice||0)+',event.value);';
+  const documentCalculationScript=`
+    function calcOferta(index, unitPrice, rawValue) {
+      function numberValue(value) {
+        var cleaned=String(value==null?'':value).replace(/lei/gi,'').replace(/\\s/g,'').replace(/\\./g,'').replace(',', '.');
+        var valueNumber=parseFloat(cleaned);
+        return isNaN(valueNumber)||valueNumber<0?0:valueNumber;
+      }
+      function moneyValue(value) {
+        var cents=Math.round(numberValue(value)*100), whole=Math.floor(cents/100), rest=cents-(whole*100);
+        return String(whole)+','+(rest<10?'0':'')+String(rest)+' lei';
+      }
+      function fieldId(value) { return ('000'+value).slice(-3); }
+      var quantity=numberValue(rawValue), quantityField=this.getField('cant_'+fieldId(index));
+      if(quantityField) quantityField.value=String(quantity);
+      var lineTotal=quantity*Number(unitPrice||0), lineField=this.getField('total_'+fieldId(index));
+      if(lineField) lineField.value=moneyValue(lineTotal);
+      var net=0;
+      for(var i=1;i<=${products.length};i++) {
+        var current=this.getField('total_'+fieldId(i));
+        if(current) net+=numberValue(current.value);
+      }
+      var netField=this.getField('total_net_general'), vatField=this.getField('total_vat_general'), totalField=this.getField('total_general');
+      if(netField) netField.value=moneyValue(net);
+      if(vatField) vatField.value=moneyValue(net*0.21);
+      if(totalField) totalField.value=moneyValue(net*1.21);
+    }
+  `;
   const formFields=[];
-  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField(),editable=!readonly,grand=name==='total_general';f.fieldName=name;f.Rect=rect;f.value=value;f.defaultValue=value;f.fontName='helvetica';f.fontStyle=(editable||grand)?'bold':'normal';f.fontSize=grand?7.6:(editable?8:7);f.maxFontSize=grand?7.6:(editable?8:7);f.color=editable?'#172536':'#0B6484';f.textAlign=grand?'right':'left';f.maxLen=editable?8:100;f.readOnly=!!readonly;if(action){const escPdf=v=>String(v).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');const live=escPdf(action.live),validate=escPdf(action.validate);Object.defineProperty(f,'AA',{value:'<< /K << /S /JavaScript /JS ('+live+') >> /V << /S /JavaScript /JS ('+validate+') >> >>',enumerable:true,configurable:false});}d.addField(f);formFields.push(f)}catch{}};
+  try{if(d.addJS)d.addJS(documentCalculationScript);}catch{}
+  const addField=(name,value,rect,readonly,action,background)=>{try{if(!d.AcroFormTextField)return;const f=new d.AcroFormTextField(),editable=!readonly,grand=name==='total_general';f.fieldName=name;f.Rect=rect;f.value=value;f.defaultValue=value;f.fontName='helvetica';f.fontStyle=(editable||grand)?'bold':'normal';f.fontSize=grand?7.6:(editable?8:7);f.maxFontSize=grand?7.6:(editable?8:7);f.color=editable?'#172536':'#0B6484';f.textAlign=grand?'right':'left';f.maxLen=editable?8:100;f.readOnly=!!readonly;if(action){const escPdf=v=>String(v).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');Object.defineProperty(f,'AA',{value:'<< /V << /S /JavaScript /JS ('+escPdf(action)+') >> >>',enumerable:true,configurable:false});}d.addField(f);formFields.push(f)}catch{}};
   const drawInfo=()=>{
     d.setLineWidth(.28);d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.roundedRect(14,33,182,45,4,4,'FD');
     d.line(26,35,26,76);d.line(122,35,122,76);d.line(180,35,180,76);
     d.setFillColor(255,255,255);d.rect(180.4,35.2,15.2,40.6,'F');
     try{d.addImage(a.logo,'PNG',31.5,38.5,25.5,25.5)}catch{}
     // Pozitii reproduse dupa panoul raster din modelul 123.pdf.
-    text(d,'FURNIZOR',67,41,5.45,true,'left',blue);text(d,company.name,67,45.35,5.75,true);
-    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,50.25+i*3.12,4.7,true));
-    text(d,'INFORMATII COMERCIALE',127,41,5.1,true,'left',blue);
-    text(d,'Preturile afisate sunt exprimate in RON.',127,45,3.85,true);
-    text(d,'Produsele pot fi comandate inclusiv in cantitati',127,48.8,3.85,true);
-    text(d,'mai mici decat o cutie completa, in functie de',127,51.25,3.85,true);
-    text(d,'necesarul si specificul fiecarui client.',127,53.7,3.85,true);
-    text(d,'Cantitatea PCS/BOX reprezinta ambalarea standard a',127,57.6,3.85,true);
-    text(d,'produsului si are caracter informativ.',127,60.05,3.85,true);
-    text(d,'Pentru comenzi recurente, volume mai mari sau achizitii',127,63.95,3.85,true);
-    text(d,'mixte de produse, oferim conditii comerciale personalizate',127,66.4,3.85,true);
-    text(d,'si posibilitatea renegocierii preturilor.',127,68.85,3.85,true);    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
+    text(d,'FURNIZOR',67,41,6.35,true,'left',blue);text(d,company.name,67,46.15,6.7,true);
+    ['CIF: '+company.cif,'Reg. com.: '+company.reg,'Str. Nicolae Balcescu, Bl.1, Sc.1,','Ap.9, Bals, Olt','BANCA TRANSILVANIA','IBAN RON: '+company.ibanRon].forEach((v,i)=>text(d,v,67,51.65+i*3.45,5.35,true));
+    text(d,'INFORMATII COMERCIALE',127,41,6.15,true,'left',blue);
+    text(d,'Preturile afisate sunt exprimate in RON.',127,46.1,4.8,true);
+    text(d,'Produsele pot fi comandate inclusiv in cantitati',127,50.5,4.8,true);
+    text(d,'mai mici decat o cutie completa, in functie de',127,53.5,4.8,true);
+    text(d,'necesarul si specificul fiecarui client.',127,56.5,4.8,true);
+    text(d,'Cantitatea PCS/BOX reprezinta ambalarea standard a',127,61,4.8,true);
+    text(d,'produsului si are caracter informativ.',127,64,4.8,true);
+    text(d,'Pentru comenzi recurente, volume mai mari sau achizitii',127,68.5,4.8,true);
+    text(d,'mixte de produse, oferim conditii comerciale personalizate',127,71.5,4.8,true);
+    text(d,'si posibilitatea renegocierii preturilor.',127,74.5,4.8,true);    d.setFillColor(234,247,252);d.setDrawColor(201,213,224);d.roundedRect(14,82,182,40,4,4,'FD');text(d,'OBSERVATII',18,88,8.5,true,'left',darkBlue);
     const notes=['1. Pentru comenzi in volume mai mari, preturile pot fi renegociate si optimizate in functie de cantitatea totala comandata.','2. Preturi B2B competitive - conditii optimizate in functie de volumul total si frecventa comenzilor.','3. Discounturi personalizate - disponibile pentru comenzi recurente si parteneriate comerciale pe termen lung.','4. Comenzi mixte - posibilitatea selectarii mai multor categorii si produse intr-o singura comanda.','5. Ofertare personalizata - la cerere, pregatim o oferta comerciala adaptata necesarului companiei dumneavoastra.','6. Parteneriate B2B - sustinem colaborarile constante prin conditii comerciale flexibile si preturi optimizate.'];
     let ny=94;d.setFont('helvetica','normal');d.setFontSize(5.9);d.setTextColor('#101828');notes.forEach(v=>{d.text(v,18,ny);ny+=2.9});
   };
-  const drawProductHeader=y=>{d.setFillColor(12,101,133);d.roundedRect(10,y,190,10,2,2,'F');const headers=[['SKU',14],['IMAGINE',27],['DENUMIRE',66],['PCS/BOX',110],['PRET NET',126],['PRET CU\nTVA',144],['CANTITATE',162],['TOTAL NET',181]];headers.forEach(([label,x])=>{d.setFont('helvetica','bold');d.setFontSize(6.2);d.setTextColor('#FFFFFF');d.text(label,x,y+6.1,{align:(x===144||x===162)?'center':'left'});});};
+  const drawProductHeader=y=>{d.setFillColor(12,101,133);d.roundedRect(10,y,190,10,2,2,'F');const headers=[['SKU',16],['IMAGINE',37],['DENUMIRE',76],['PCS/BOX',118],['PRET NET',135],['PRET CU\nTVA',152],['CANTITATE',169],['TOTAL NET',187]];headers.forEach(([label,x])=>{d.setFont('helvetica','bold');d.setFontSize(6.2);d.setTextColor('#FFFFFF');d.text(label,x,y+6.1,{align:'center'});});};
   const drawProduct=(p,y)=>{const h=24;d.setDrawColor(213,225,232);d.setFillColor(p.i%2?alt:'#FFFFFF');d.roundedRect(10,y,190,h,2,2,'FD');d.setFillColor(225,245,251);d.roundedRect(11,y+1.5,10,h-3,1.5,1.5,'F');text(d,plain(p.x.sku||'-'),16,y+13,6.5,true,'center',darkBlue);
     if(p.image){try{const prop=d.getImageProperties(p.image),ratio=prop.width/prop.height,slot={x:29,y:y+4,w:16,h:16};let w=slot.w,hh=w/ratio;if(hh>slot.h){hh=slot.h;w=hh*ratio}d.addImage(p.image,slot.x+(slot.w-w)/2,slot.y+(slot.h-hh)/2,w,hh)}catch{}}
     const name=d.splitTextToSize(plain(p.x.product).toUpperCase(),58);d.setFont('helvetica','normal');d.setFontSize(6.7);d.setTextColor('#101828');d.text(name,76,y+11.5,{align:'center'});
     text(d,Math.max(0,num(p.x.availableQuantity))+' '+plain(p.x.unit),118,y+13,6.6,true,'center');text(d,money(p.x.unitPrice),135,y+13,6.6,true,'center');text(d,money(p.x.unitPrice*1.21),152,y+13,6.6,true,'center',darkBlue);
-    const netPrice=Number(p.x.unitPrice||0),qty=Math.max(0,num(p.x.quantity)),fieldNo=p.i+1,fieldId=('000'+fieldNo).slice(-3);d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.setLineWidth(.3);d.rect(163,y+8,12,6.8,'FD');d.setFillColor(234,247,252);d.rect(178,y+8,19,6.8,'F');addField('cant_'+fieldId,'0',[163,y+8,12,6.8],false,{live:calculationAction(fieldNo,netPrice,products.length,true),validate:calculationAction(fieldNo,netPrice,products.length,false)},[255,255,255]);addField('total_'+fieldId,moneyValue(0),[178,y+8,19,6.8],true,null,[234,247,252]);
+    const netPrice=Number(p.x.unitPrice||0),qty=Math.max(0,num(p.x.quantity)),fieldNo=p.i+1,fieldId=('000'+fieldNo).slice(-3);d.setDrawColor(201,213,224);d.setFillColor(255,255,255);d.setLineWidth(.3);d.rect(163,y+8,12,6.8,'FD');d.setFillColor(234,247,252);d.rect(178,y+8,19,6.8,'F');addField('cant_'+fieldId,'0',[163,y+8,12,6.8],false,calculationAction(fieldNo,netPrice),[255,255,255]);addField('total_'+fieldId,moneyValue(0),[178,y+8,19,6.8],true,null,[234,247,252]);
   };
   base(d,a,false,o);drawInfo();let y=127;drawProductHeader(y);y+=12;
   for(const p of products){if(y+24>276){d.addPage();base(d,a,true,o);y=35;drawProductHeader(y);y+=12}drawProduct(p,y);y+=26;}
